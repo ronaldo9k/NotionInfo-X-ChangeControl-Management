@@ -6,7 +6,7 @@ const APP_FILES = [
   './',
   './index.html',
   './manifest.json',
-  './R9.png'
+  './PHS.png'
 ];
 
 // 서비스워커 설치

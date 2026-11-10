@@ -12,13 +12,13 @@
   "theme_color": "#101827",
   "icons": [
     {
-      "src": "./R9.png",
+      "src": "./PHS.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "./R9.png",
+      "src": "./PHS.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"

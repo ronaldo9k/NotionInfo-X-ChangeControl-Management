@@ -1,7 +1,7 @@
 {
   "id": "./",
   "name": "푸로찜 거래처·입출고 관리",
-  "short_name": "푸로찜 관리",
+  "short_name": "노션 변경관리",
   "description": "푸로찜 총판 거래처 및 입출고 관리 웹앱",
   "lang": "ko-KR",
   "start_url": "./",

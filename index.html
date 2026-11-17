@@ -6,89 +6,254 @@
 <meta name="theme-color" content="#101827">
 <title>푸로찜 거래처·입출고 관리</title>
 <link rel="manifest" href="./manifest.json">
-<meta name="theme-color" content="#101827">
+<link rel="icon" type="image/png" href="./R9.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="푸로찜 관리">
 <script src="https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
 <style>
 :root{--bg:#f3f5f8;--ink:#172033;--muted:#667085;--line:#e4e8ef;--navy:#101827;--blue:#2457d6;--blue2:#eaf0ff;--red:#c93636;--green:#16794b;--white:#fff;--shadow:0 12px 36px rgba(16,24,39,.10)}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:Arial,'Noto Sans KR',sans-serif}button,input,select,textarea{font:inherit}button{cursor:pointer;border:0;border-radius:10px;padding:11px 15px;font-weight:700}button:disabled{opacity:.45;cursor:not-allowed}.primary{background:var(--blue);color:#fff}.secondary{background:#eef1f6;color:#293449}.danger{background:#fff0f0;color:var(--red);border:1px solid #ffd5d5}.ghost{background:#fff;border:1px solid var(--line);color:#344054}.top{background:var(--navy);color:#fff;padding:20px max(18px,calc((100vw - 1200px)/2));display:flex;align-items:center;justify-content:space-between;gap:14px}.brand{font-size:19px;font-weight:800}.subbrand{font-size:12px;color:#aeb9ca;margin-top:5px}.top-right{display:flex;gap:8px;align-items:center}.top-right button{font-size:12px;padding:8px 10px}.wrap{max-width:1200px;margin:22px auto;padding:0 16px}.tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px}.tab{background:#fff;border:1px solid var(--line);color:#475467}.tab.active{background:var(--blue);border-color:var(--blue);color:#fff}.panel{background:#fff;border:1px solid var(--line);border-radius:16px;padding:20px;box-shadow:0 2px 10px rgba(16,24,39,.03);margin-bottom:16px}.panel h2{font-size:18px;margin:0 0 7px}.muted{color:var(--muted);font-size:13px;line-height:1.55}.toolbar{display:flex;gap:8px;flex-wrap:wrap;margin:16px 0}.toolbar input,.toolbar select{min-width:180px;flex:1}.field{display:flex;flex-direction:column;gap:6px;min-width:0}.field label{font-size:13px;font-weight:700;color:#344054}.field small{font-size:11px;color:#98a2b3}.field input,.field select,.field textarea,.toolbar input,.toolbar select{border:1px solid #d0d5dd;border-radius:9px;padding:10px 11px;background:#fff;color:#172033;width:100%;min-height:42px}.field textarea{min-height:76px;resize:vertical}.field input:focus,.field select:focus,.field textarea:focus{outline:2px solid #c7d6ff;border-color:#7899ff}.form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.form-grid .wide{grid-column:1/-1}.table-wrap{overflow:auto;border:1px solid var(--line);border-radius:12px}table{width:100%;border-collapse:collapse;min-width:700px}th,td{padding:11px 12px;text-align:left;border-bottom:1px solid var(--line);font-size:13px;vertical-align:middle}th{background:#f8fafc;color:#475467;font-size:12px;position:sticky;top:0}tr:last-child td{border-bottom:0}.row-title{font-weight:700}.row-actions{display:flex;gap:6px;white-space:nowrap}.row-actions button{padding:7px 9px;font-size:12px}.pill{display:inline-block;padding:4px 8px;border-radius:20px;background:#f0f3f8;color:#475467;font-size:11px}.notice{padding:12px 14px;background:#f5f8ff;border:1px solid #dce6ff;border-radius:10px;color:#344b80;font-size:13px;line-height:1.55;margin:12px 0}.warning{background:#fff8e8;border-color:#ffe3a3;color:#7a4b00}.success{background:#eaf8f0;border-color:#bce8ce;color:#17633d}.error{background:#fff0f0;border-color:#ffd1d1;color:#a52828}.hidden{display:none!important}.actions{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;margin-top:18px}.modal-backdrop{position:fixed;inset:0;background:rgba(12,18,30,.58);display:flex;align-items:center;justify-content:center;padding:14px;z-index:50}.modal{width:min(900px,100%);max-height:92vh;overflow:auto;background:#fff;border-radius:18px;padding:22px;box-shadow:var(--shadow)}.modal-head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:16px}.modal-head h2{margin:0;font-size:20px}.modal-close{background:#f1f3f6;padding:8px 11px}.login{position:fixed;inset:0;background:linear-gradient(135deg,#0d1627,#1c2d4a);display:flex;align-items:center;justify-content:center;padding:18px;z-index:100}.login-card{width:min(390px,100%);background:#fff;border-radius:20px;padding:28px;box-shadow:var(--shadow)}.login-card h1{font-size:22px;margin:0 0 8px}.login-card input{width:100%;padding:13px;border:1px solid #cfd5df;border-radius:10px;margin:14px 0}.login-card button{width:100%}.spinner{display:inline-block;width:14px;height:14px;border:2px solid #ccd4e2;border-top-color:var(--blue);border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle}@keyframes spin{to{transform:rotate(360deg)}}.empty{text-align:center;padding:34px;color:#98a2b3}.address-tools{display:flex;gap:8px;align-items:center}.address-tools button{white-space:nowrap;padding:8px 10px;font-size:12px}.foot{font-size:11px;color:#98a2b3;text-align:center;padding:20px}.log-change{white-space:pre-wrap;overflow-wrap:anywhere;max-width:260px}.history-meta{font-size:11px;color:#667085;line-height:1.5}.read-only{background:#f7f8fa!important;color:#98a2b3!important}
-@media(max-width:700px){.top{padding:16px}.brand{font-size:16px}.wrap{margin:14px auto}.panel{padding:15px}.form-grid{grid-template-columns:1fr}.form-grid .wide{grid-column:auto}.toolbar input,.toolbar select{min-width:100%}.modal{padding:16px}.tabs{display:grid;grid-template-columns:repeat(2,1fr)}.tab{padding:10px 7px;font-size:12px}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:Arial,'Noto Sans KR',sans-serif}button,input,select,textarea{font:inherit}button{cursor:pointer;border:0;border-radius:10px;padding:11px 15px;font-weight:700}button:disabled{opacity:.45;cursor:not-allowed}.primary{background:var(--blue);color:#fff}.secondary{background:#eef1f6;color:#293449}.danger{background:#fff0f0;color:var(--red);border:1px solid #ffd5d5}.ghost{background:#fff;border:1px solid var(--line);color:#344054}
+.top{background:var(--navy);color:#fff;padding:20px max(18px,calc((100vw - 1200px)/2));display:flex;align-items:center;justify-content:space-between;gap:14px}.brand{font-size:19px;font-weight:800}.subbrand{font-size:12px;color:#aeb9ca;margin-top:5px}.top-right{display:flex;gap:8px;align-items:center}.top-right button{font-size:12px;padding:8px 10px}
+.wrap{max-width:1200px;margin:22px auto;padding:0 16px}.tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px}.tab{background:#fff;border:1px solid var(--line);color:#475467}.tab.active{background:var(--blue);border-color:var(--blue);color:#fff}
+.panel{background:#fff;border:1px solid var(--line);border-radius:16px;padding:20px;box-shadow:0 2px 10px rgba(16,24,39,.03);margin-bottom:16px}.panel h2{font-size:18px;margin:0 0 7px}.panel h3{font-size:15px;margin:20px 0 8px;color:#1d2939}
+.muted{color:var(--muted);font-size:13px;line-height:1.55}.toolbar{display:flex;gap:8px;flex-wrap:wrap;margin:16px 0}.toolbar input,.toolbar select{min-width:180px;flex:1}
+.field{display:flex;flex-direction:column;gap:6px;min-width:0}.field label{font-size:13px;font-weight:700;color:#344054}.field small{font-size:11px;color:#98a2b3}
+.field input,.field select,.field textarea,.toolbar input,.toolbar select{border:1px solid #d0d5dd;border-radius:9px;padding:10px 11px;background:#fff;color:#172033;width:100%;min-height:42px}.field textarea{min-height:76px;resize:vertical}.field input:focus,.field select:focus,.field textarea:focus{outline:2px solid #c7d6ff;border-color:#7899ff}
+.form-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}.form-grid .wide{grid-column:span 2}
+.table-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:12px}table{width:100%;border-collapse:collapse;font-size:13px;min-width:640px}th{background:#f8fafc;text-align:left;padding:10px 8px;border-bottom:1px solid var(--line);white-space:nowrap;font-size:12px;color:#475467}td{padding:9px 8px;border-bottom:1px solid #f1f4f8;vertical-align:top}.row-title{font-weight:700}.row-actions{display:flex;gap:6px}.row-actions button{font-size:12px;padding:7px 10px}.empty{padding:26px;text-align:center;color:var(--muted)}.actions{margin-top:12px;text-align:center}
+.notice{background:var(--blue2);border:1px solid #c7d6ff;color:#1d3fa0;border-radius:10px;padding:11px 13px;font-size:13px;line-height:1.6;margin:10px 0}.notice.warning{background:#fff8e6;border-color:#ffe1a6;color:#8a5a00}.notice.error{background:#fff0f0;border-color:#ffd5d5;color:var(--red)}
+.pill{display:inline-block;padding:3px 9px;border-radius:999px;font-size:11px;font-weight:700}.pill.ok{background:#e7f6ee;color:var(--green)}.pill.no{background:#f2f4f7;color:#98a2b3}
+.hidden{display:none!important}.spinner{display:inline-block;width:14px;height:14px;border:2px solid rgba(0,0,0,.15);border-top-color:var(--blue);border-radius:50%;animation:spin .8s linear infinite;vertical-align:-2px}@keyframes spin{to{transform:rotate(360deg)}}
+.modal-backdrop{position:fixed;inset:0;background:rgba(16,24,39,.45);z-index:100;display:flex;align-items:flex-start;justify-content:center;padding:5vh 14px;overflow:auto}.modal{background:#fff;border-radius:16px;max-width:860px;width:100%;padding:20px;box-shadow:var(--shadow)}.modal-head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}.modal-close{background:#f2f4f7;padding:8px 12px}.foot{text-align:center;color:var(--muted);font-size:12px;padding:20px 0 34px}
+.read-only{background:#f8fafc;color:#667085}.pre{white-space:pre-line;max-width:260px}.history-meta{font-size:11px;color:#98a2b3;word-break:break-all}.log-change{max-width:220px;white-space:pre-wrap;word-break:break-all;font-size:12px}
+.stat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(128px,1fr));gap:8px;margin:8px 0 4px}
+.stat-card{background:linear-gradient(180deg,#fff,#f7f9fd);border:1px solid var(--line);border-radius:12px;padding:10px 8px;text-align:center;min-width:0}
+.stat-label{font-size:11px;color:var(--muted);margin-bottom:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.stat-value{font-size:15px;font-weight:800;word-break:keep-all}.stat-card.warn{background:linear-gradient(180deg,#fff,#fff6f0);border-color:#ffd9bd}.stat-card.warn .stat-value{color:#b54708}
+.date-cell{border:1px solid #d0d5dd;border-radius:8px;padding:6px 8px;min-height:34px;background:#fff}.date-cell:disabled{background:#f2f4f7}
+.prod-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px;margin:10px 0}
+.prod-card{border:1px solid var(--line);border-radius:14px;padding:14px;background:linear-gradient(180deg,#fff,#f6f8fc)}.prod-card .name{font-weight:800;font-size:14px;margin-bottom:8px}.prod-card .row{display:flex;justify-content:space-between;font-size:12.5px;padding:4px 0;border-top:1px dashed #eef1f6}.prod-card .row b{font-size:13px}
+.manual-body{max-height:64vh;overflow:auto;font-size:13.5px;line-height:1.75}.manual-body h4{margin:16px 0 6px;color:var(--navy)}.manual-body li{margin:3px 0}
+@media(max-width:700px){.top{padding:16px}.brand{font-size:16px}.wrap{margin:14px auto}.panel{padding:15px}.form-grid{grid-template-columns:1fr}.form-grid .wide{grid-column:auto}.toolbar input,.toolbar select{min-width:100%}.modal{padding:16px}.tabs{display:grid;grid-template-columns:repeat(2,1fr)}.tab{padding:10px 7px;font-size:12px}.stat-grid{grid-template-columns:repeat(3,1fr);gap:6px}.stat-card{padding:8px 4px;border-radius:10px}.stat-value{font-size:12.5px}.stat-label{font-size:10px}}
 </style>
 </head>
 <body>
-<div class="login" id="loginView">
-  <div class="login-card">
-    <h1>푸로찜 관리 웹앱</h1><p class="muted">거래처 DB와 입출고 DB를 안전하게 관리합니다.</p>
-    <label class="field"><span>관리자 비밀번호</span><input id="pinInput" type="password" autocomplete="current-password" placeholder="GAS에 설정한 관리자 PIN"></label>
-    <button class="primary" id="loginBtn">로그인</button><div id="loginMsg" class="muted" style="margin-top:12px"></div>
-  </div>
-</div>
 <header class="top">
-  <div><div class="brand">푸로찜 거래처 · 입출고 관리</div><div class="subbrand">Notion 독립 관리 시스템 · 변경 이력 자동 누적</div></div>
-  <div class="top-right"><span id="connectionLabel" class="pill" style="background:#26364e;color:#dbe5f5">연결 대기</span><button class="ghost" id="logoutBtn">로그아웃</button></div>
+  <div><div class="brand">푸로찜 거래처 · 입출고 관리</div><div class="subbrand">Notion 독립 관리 시스템 v2.0 · 변경 이력 자동 누적</div></div>
+  <div class="top-right"><span id="connectionLabel" class="pill" style="background:#26364e;color:#dbe5f5">연결 중</span><button class="ghost" id="manualBtn">📖 매뉴얼</button></div>
 </header>
-<main class="wrap hidden" id="appView">
+<main class="wrap" id="appView">
   <nav class="tabs">
-    <button class="tab active" data-tab="clients">거래처 관리</button>
-    <button class="tab" data-tab="inouts">입출고 관리</button>
+    <button class="tab active" data-tab="dashboard">입출고 현황</button>
+    <button class="tab" data-tab="stats">총판 통계</button>
+    <button class="tab" data-tab="clients">거래처 관리</button>
     <button class="tab" data-tab="newclient">거래처 추가</button>
     <button class="tab" data-tab="history">변경 이력</button>
   </nav>
-  <section id="clientsPanel" class="panel">
+
+  <section id="dashboardPanel" class="panel">
+    <h2>푸로찜 입출고 현황</h2><div class="muted">Notion 입출고 DB·제품 DB를 실시간 조회합니다. 납품일자 칸의 캘린더에서 날짜를 고르면 Notion 납품일자에 즉시 반영 + 변경 이력 Log 기록.</div>
+    <h3>① 푸로찜 제품별 현황</h3><div id="prodBox"></div>
+    <h3>② 배송 필요 List (출고 대기)</h3><div id="shipWaitBox"></div>
+    <h3>③ 본사납품 필요 List (입고 대기)</h3><div id="inboundWaitBox"></div>
+    <h3>④ 최근 납품 List (최근 7일)</h3><div id="recentBox"></div>
+  </section>
+
+  <section id="statsPanel" class="panel hidden">
+    <h2>푸로찜 총판 통계 현황</h2><div class="muted" id="statsBasis"></div>
+    <div id="statsBody"></div>
+    <h3>🔎 기간 검색</h3>
+    <div class="toolbar"><label style="align-self:center;font-size:13px;font-weight:700">시작일</label><input type="date" id="searchStart"><label style="align-self:center;font-size:13px;font-weight:700">종료일</label><input type="date" id="searchEnd"><button class="primary" id="searchStatsBtn">조회</button></div>
+    <div id="searchStatsBox"></div>
+  </section>
+
+  <section id="clientsPanel" class="panel hidden">
     <h2>거래처 DB 관리</h2><div class="muted">거래처 페이지를 조회·수정·보관할 수 있습니다. 보관은 영구 삭제가 아닌 Notion 휴지통 이동입니다.</div>
     <div class="toolbar"><input id="clientsSearch" placeholder="거래처명 검색"><button class="primary" id="clientsSearchBtn">검색</button><button class="secondary" id="clientsReload">새로고침</button><button class="ghost" id="clientsAdd">신규 거래처 추가</button></div>
     <div id="clientsTable"></div><div class="actions"><button class="ghost hidden" id="clientsMore">다음 100건 불러오기</button></div>
   </section>
-  <section id="inoutsPanel" class="panel hidden">
-    <h2>입출고 DB 관리</h2><div class="muted">입출고 페이지의 수정 가능한 속성만 변경됩니다. 수식·롤업 등 자동 계산 속성은 읽기 전용입니다.</div>
-    <div class="toolbar"><input id="inoutsSearch" placeholder="입출고 페이지 제목 검색"><button class="primary" id="inoutsSearchBtn">검색</button><button class="secondary" id="inoutsReload">새로고침</button></div>
-    <div id="inoutsTable"></div><div class="actions"><button class="ghost hidden" id="inoutsMore">다음 100건 불러오기</button></div>
-  </section>
+
   <section id="newclientPanel" class="panel hidden">
     <h2>거래처 정보 추가 / 휴면 거래처 재사용</h2>
     <div class="notice warning"><b>휴면 거래처 재사용 조건</b><br>총 출고량이 0이고, 입출고 DB에 연결된 페이지가 0건인 경우에만 서버가 최종 재검증 후 재사용을 허용합니다. 조건이 하나라도 맞지 않으면 새 거래처를 생성해주세요.</div>
     <div class="toolbar"><button class="primary" id="newClientBtn">신규 거래처 등록 화면</button><button class="secondary" id="dormantLoadBtn">재사용 가능한 후보 조회</button></div>
     <div id="dormantCandidates"></div>
   </section>
+
   <section id="historyPanel" class="panel hidden">
-    <h2>변경 이력</h2><div class="muted">웹앱에서 발생한 추가·수정·보관·복원 내역입니다. 변경 전(As is)과 변경 후(To be) 값은 기록 당시의 문자열로 보관되어 이후 노션 값이 바뀌어도 과거 기록은 바뀌지 않습니다.</div>
+    <h2>변경 이력</h2><div class="muted">웹앱에서 발생한 추가·수정·납품일자 입력·보관·복원 내역입니다. 변경 전(As is)과 변경 후(To be) 값은 기록 당시의 문자열로 보관되어 이후 노션 값이 바뀌어도 과거 기록은 바뀌지 않습니다.</div>
     <div class="toolbar"><input id="historyKeyword" placeholder="거래처명 / 페이지명 / 속성 / 변경값 검색"><select id="historyDb"><option value="all">전체 DB</option><option value="거래처 DB">거래처 DB</option><option value="입출고 DB">입출고 DB</option></select><select id="historyAction"><option value="">전체 작업</option><option>추가</option><option>수정</option><option>휴면 거래처 재사용</option><option>보관(삭제)</option><option>복원</option></select><button class="primary" id="historySearchBtn">조회</button></div>
     <div id="historyTable"></div><div class="actions"><a id="auditSheetLink" href="#" target="_blank" rel="noopener" class="hidden"><button class="secondary">Google 시트 원본 열기</button></a></div>
   </section>
   <div class="foot">푸로찜 총판 관리용 · 기존 음성 입출고 자동화와 별도 프로젝트</div>
 </main>
+
 <div class="modal-backdrop hidden" id="editModal"><div class="modal"><div class="modal-head"><div><h2 id="modalTitle">정보 수정</h2><div class="muted" id="modalSub"></div></div><button class="modal-close" id="modalClose">닫기 ✕</button></div><div id="modalNotice"></div><div id="editForm" class="form-grid"></div><div class="actions"><button class="secondary" id="modalCancel">취소</button><button class="primary" id="modalSave">저장 및 이력 기록</button></div></div></div>
+
+<div class="modal-backdrop hidden" id="manualModal"><div class="modal"><div class="modal-head"><div><h2>📖 사용 매뉴얼</h2><div class="muted">초등학생도 이해할 수 있는 사용법</div></div><button class="modal-close" id="manualClose">닫기 ✕</button></div>
+<div class="manual-body">
+<h4>1. 이 앱이 하는 일</h4>
+<li>노션에 있는 <b>거래처 DB / 입출고 DB / 제품 DB</b>를 휴대폰·PC에서 쉽게 보고 고치는 도구입니다.</li>
+<li>모든 변경은 <b>Google 시트 "변경 이력 Log"</b>에 언제·누가·무엇을·무엇에서 무엇으로 바꿨는지 자동 기록됩니다.</li>
+<h4>2. 입출고 현황 탭 (처음 화면)</h4>
+<li><b>제품별 현황</b>: 제품 3개의 창고 재고량, 납품예정 반영 재고량, 마지막 입고 후 "OO일 경과"를 보여줍니다.</li>
+<li><b>배송 필요 List(출고 대기)</b>: 제목이 "출고"이고 배송필요에 체크된 건만 나옵니다.</li>
+<li><b>본사납품 필요 List(입고 대기)</b>: 제목이 "입고"이고 배송필요에 체크된 건만 나옵니다.</li>
+<li><b>최근 납품 List</b>: 납품일자가 최근 7일 안인 건이 출고 → 입고 순서로 나옵니다.</li>
+<li><b>납품일자 입력</b>: 리스트의 납품일자 빈 칸을 누르면 캘린더가 뜹니다. 날짜를 고르면 그 순간 노션 "납품일자"에 자동 저장되고 변경 이력에도 기록됩니다. (저장 버튼 필요 없음)</li>
+<h4>3. 총판 통계 탭</h4>
+<li>미수금·평균 Profit·월별 판매수량/입고수량/판매금/입고액/Profit/택배비 등이 버튼 카드로 보입니다.</li>
+<li>아래 <b>기간 검색</b>에서 시작일~종료일을 고르고 조회를 누르면 그 기간의 6가지 합계가 나옵니다.</li>
+<h4>4. 거래처 관리 / 거래처 추가</h4>
+<li>거래처 목록에서 <b>수정</b>을 누르고 값을 바꾼 뒤 <b>저장 및 이력 기록</b>을 누르면, Yes/No 확인 팝업이 먼저 뜨고 "예"를 눌러야만 저장됩니다.</li>
+<li>주소 입력란 옆 <b>다음 주소 검색</b>으로 도로명·지번주소를 한 번에 넣을 수 있습니다.</li>
+<h4>5. 변경 이력 탭</h4>
+<li>모든 변경 기록을 검색할 수 있고, "보관(삭제)"한 페이지는 <b>복원</b> 버튼으로 되살릴 수 있습니다.</li>
+<li>하단 <b>Google 시트 원본 열기</b>로 전체 Log 시트를 볼 수 있습니다.</li>
+<h4>6. 주의</h4>
+<li>로그인 없이 열리는 앱이니 <b>앱 주소를 아는 사람은 누구나 사용 가능</b>합니다. 주소를 꼭 필요한 사람에게만 공유하세요.</li>
+<li>수식·롤업(자동 계산) 값은 노션에서 계산되므로 이 앱에서 바꿀 수 없습니다.</li>
+</div></div></div>
+
 <div id="toast" style="position:fixed;bottom:18px;left:50%;transform:translateX(-50%);z-index:120;max-width:92vw;background:#172033;color:#fff;padding:12px 16px;border-radius:12px;box-shadow:var(--shadow);display:none;font-size:13px"></div>
 <script>
-const GAS_URL = 'https://script.google.com/macros/s/AKfycbz-iw8jksqt94N0SfcQ6Hk4FI_Xs4IbJx-su7s-4p30VYJW0rVr8xl230hKGegtyvXAqA/exec';
-let PIN = '';
-let INIT = null;
-let currentTab = 'clients';
-let currentEdit = null;
-let listState = {clients:{cursor:null,search:''},inouts:{cursor:null,search:''}};
-let activeSchema = [];
-let activeRelationOptions = {};
-let isNewClient = false;
-let initialFormValues = {};
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbyACaJDFXTKUT6lZ03cRDOT1bW2bioSAkaCsq0Vm05fpmQ_xNYplXMPH-1IGIv1HQPP-Q/exec';   // ← 배포한 GAS 웹앱 주소를 여기에 입력
+let INIT = null, STATS = null, DASH = null;
+let currentTab = 'dashboard', currentEdit = null;
+let listState = {clients:{cursor:null,search:''}};
+let activeSchema = [], activeRelationOptions = {}, isNewClient = false, initialFormValues = {};
 
 const $ = id => document.getElementById(id);
 function toast(msg,ms=3200){const t=$('toast');t.textContent=msg;t.style.display='block';clearTimeout(window.__toastTimer);window.__toastTimer=setTimeout(()=>t.style.display='none',ms);}
 function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 async function api(action,payload={}){
   if(GAS_URL==='GAS_WEB_APP_URL_HERE') throw new Error('index.html의 GAS_URL에 배포한 GAS 웹앱 주소를 입력해주세요.');
-  const res=await fetch(GAS_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action,pin:PIN,...payload})});
+  const res=await fetch(GAS_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(Object.assign({action:action},payload))});
   const raw=await res.text();let data;try{data=JSON.parse(raw)}catch(e){throw new Error('GAS 응답을 해석할 수 없습니다. 웹앱 배포 주소와 액세스 권한을 확인해주세요. '+raw.slice(0,150))}
   if(data.status!=='success') throw new Error(data.message||'요청에 실패했습니다.');
   return data.data;
 }
-async function login(){PIN=$('pinInput').value.trim();if(!PIN){$('loginMsg').textContent='관리자 비밀번호를 입력해주세요.';return} $('loginBtn').disabled=true;$('loginBtn').innerHTML='<span class="spinner"></span> 연결 중';try{INIT=await api('initial');$('loginView').classList.add('hidden');$('appView').classList.remove('hidden');$('connectionLabel').textContent='Notion 연결됨';await loadList('clients',true);toast('로그인 및 Notion 연결이 완료됐습니다.')}catch(e){PIN='';$('loginMsg').textContent=e.message;}finally{$('loginBtn').disabled=false;$('loginBtn').textContent='로그인';}}
-function logout(){PIN='';INIT=null;$('appView').classList.add('hidden');$('loginView').classList.remove('hidden');$('pinInput').value='';$('loginMsg').textContent='';$('connectionLabel').textContent='연결 대기';}
-function switchTab(tab){currentTab=tab;document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('active',b.dataset.tab===tab));['clients','inouts','newclient','history'].forEach(x=>$(x+'Panel').classList.toggle('hidden',x!==tab));if(tab==='history')loadHistory();if(tab==='newclient')$('dormantCandidates').innerHTML='';}
 function setBusy(el,busy){if(!el)return;el.disabled=busy;if(busy){el.dataset.old=el.textContent;el.innerHTML='<span class="spinner"></span> 처리 중'}else el.textContent=el.dataset.old||el.textContent;}
-async function loadList(key,reset=false){const btn=$(key==='clients'?'clientsReload':'inoutsReload');try{if(reset){listState[key].cursor=null;listState[key].search=$(key+'Search').value.trim();$(key+'Table').innerHTML='<div class="empty"><span class="spinner"></span> Notion 조회 중</div>';}const data=await api('listPages',{dbKey:key,search:listState[key].search,cursor:reset?null:listState[key].cursor,pageSize:100});renderList(key,data,reset);listState[key].cursor=data.nextCursor;$(key+'More').classList.toggle('hidden',!data.hasMore);}catch(e){$(key+'Table').innerHTML='<div class="notice error">'+esc(e.message)+'</div>';} }
-function renderList(key,data,reset){const target=$(key+'Table');let html='';if(reset)html='<div class="table-wrap"><table><thead><tr><th>페이지명</th><th>주요 정보</th><th>최근 수정</th><th>관리</th></tr></thead><tbody id="'+key+'Rows"></tbody></table></div>';if(reset)target.innerHTML=html;const body=$(key+'Rows');if(!data.pages.length&&reset){target.innerHTML='<div class="empty">조회 결과가 없습니다.</div>';return;}if(!body)return;data.pages.forEach(p=>{const summary=key==='clients'?['연락처','도로명주소','총 출고량'].map(k=>p.values[k]!==undefined&&p.values[k]!==''?k+': '+(Array.isArray(p.values[k])?p.values[k].join(', '):p.values[k]):'').filter(Boolean).join(' · '):['납품일자','납품요청일','수량','구분(규격)'].map(k=>p.values[k]!==undefined&&p.values[k]!==''?k+': '+p.values[k]:'').filter(Boolean).join(' · ');const tr=document.createElement('tr');tr.innerHTML='<td><div class="row-title">'+esc(p.title||'(제목 없음)')+'</div><div class="history-meta">'+esc(p.id)+'</div></td><td>'+esc(summary||'—')+'</td><td>'+esc((p.editedTime||'').replace('T',' ').slice(0,16))+'</td><td><div class="row-actions"><button class="primary" data-edit="'+esc(p.id)+'">수정</button><button class="danger" data-archive="'+esc(p.id)+'">보관</button></div></td>';body.appendChild(tr);});body.querySelectorAll('[data-edit]').forEach(b=>b.addEventListener('click',()=>openEdit(key,b.dataset.edit)));body.querySelectorAll('[data-archive]').forEach(b=>b.addEventListener('click',()=>archive(key,b.dataset.archive)));}
-async function openEdit(key,pageId){try{const data=await api('getPage',{dbKey:key,pageId});currentEdit={dbKey:key,pageId:pageId};activeSchema=data.schema;activeRelationOptions=data.relationOptions||{};isNewClient=false;$('modalTitle').textContent=(key==='clients'?'거래처':'입출고')+' 정보 수정';$('modalSub').textContent=data.page.title+' · 변경 전/후 값 자동 기록';$('modalNotice').innerHTML='<div class="notice">저장 버튼을 누르면 변경된 속성만 Notion에 반영하고, 속성별 As is / To be 값이 변경 이력 Log에 누적됩니다.</div>';renderForm(data.schema,data.page.values,false);$('editModal').classList.remove('hidden');}catch(e){toast(e.message,5000)}}
+function check_(v){return v?'<span class="pill ok">✔</span>':'<span class="pill no">✖</span>';}
+function fmtN_(v){if(v===''||v==null)return '—';return (typeof v==='number')?v.toLocaleString('ko-KR'):String(v);}
+function weekday_(d){if(!d)return '—';try{const w=['일','월','화','수','목','금','토'][new Date(d+'T00:00:00Z').getUTCDay()];return d.slice(5)+' ('+w+')';}catch(e){return d;}}
+function switchTab(tab){currentTab=tab;document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('active',b.dataset.tab===tab));['dashboard','stats','clients','newclient','history'].forEach(x=>$(x+'Panel').classList.toggle('hidden',x!==tab));
+  if(tab==='dashboard')loadDashboard();if(tab==='stats')loadStats();if(tab==='history')loadHistory();if(tab==='newclient')$('dormantCandidates').innerHTML='';}
+
+/* ── 부팅 (PIN 없이 바로 시작) ── */
+async function boot(){
+  try{
+    $('connectionLabel').textContent='Notion 연결 중';
+    INIT=await api('initial');
+    $('connectionLabel').textContent='Notion 연결됨';
+    await Promise.all([loadDashboard(),loadList('clients',true)]);
+  }catch(e){$('connectionLabel').textContent='연결 실패';toast(e.message,6000);}
+}
+
+/* ── 요청사항 1: 입출고 현황 ── */
+async function loadDashboard(){
+  const boxes=['prodBox','shipWaitBox','inboundWaitBox','recentBox'];
+  boxes.forEach(b=>$(b).innerHTML='<div class="empty"><span class="spinner"></span> Notion 조회 중</div>');
+  try{
+    DASH=await api('getDashboard',{});
+    renderProducts(DASH.products);renderShipWait(DASH.shipWait);renderInboundWait(DASH.inboundWait);renderRecent(DASH.recent);
+  }catch(e){boxes.forEach(b=>$(b).innerHTML='<div class="notice error">'+esc(e.message)+'</div>');}
+}
+function renderProducts(rows){
+  const box=$('prodBox');
+  if(!rows||!rows.length){box.innerHTML='<div class="empty">제품 정보가 없습니다.</div>';return;}
+  box.innerHTML='<div class="prod-grid">'+rows.map(p=>{
+    const days=(p.days===''||p.days===null)?'입고 기록 없음':Number(p.days).toLocaleString('ko-KR')+'일 경과';
+    return '<div class="prod-card"><div class="name">'+esc(p.name||'(제품 없음)')+'</div>'+
+      '<div class="row"><span>창고 재고량</span><b>'+esc(fmtN_(p.stock))+'</b></div>'+
+      '<div class="row"><span>납품예정 반영 재고량</span><b>'+esc(fmtN_(p.stockPlan))+'</b></div>'+
+      '<div class="row"><span>마지막 입고일</span><b>'+esc(p.lastInbound||'—')+'</b></div>'+
+      '<div class="row"><span>입고 경과</span><b style="color:var(--blue)">'+esc(days)+'</b></div></div>';
+  }).join('')+'</div>';
+}
+function bindDateInputs(target){
+  target.querySelectorAll('.date-cell').forEach(inp=>{
+    inp.addEventListener('change',async()=>{
+      const v=inp.value;
+      if(v===inp.dataset.prev)return;
+      inp.disabled=true;
+      try{const r=await api('saveDeliveryDate',{pageId:inp.dataset.pageId,date:v});inp.dataset.prev=v;toast(r.message);}
+      catch(err){inp.value=inp.dataset.prev||'';toast(err.message,5000);}
+      finally{inp.disabled=false;}
+    });
+  });
+  target.querySelectorAll('[data-edit2]').forEach(b=>b.addEventListener('click',()=>openEdit('inouts',b.dataset.edit2)));
+}
+function renderShipWait(rows){
+  const t=$('shipWaitBox');
+  if(!rows.length){t.innerHTML='<div class="empty">배송 필요(출고 대기) 항목이 없습니다. ✅</div>';return;}
+  t.innerHTML='<div class="table-wrap"><table><thead><tr><th>No.</th><th>거래처</th><th>납품형태</th><th>납품요청일</th><th>납품일자</th><th>주소</th><th>명세표발행</th><th>발송대기</th><th>관리</th></tr></thead><tbody>'+
+    rows.map((r,i)=>'<tr><td>'+(i+1)+'</td><td class="pre">'+esc(r.client||r.title)+'</td><td>'+esc(r.type||'—')+'</td><td>'+esc(weekday_(r.request))+'</td>'+
+    '<td><input type="date" class="date-cell" data-page-id="'+esc(r.id)+'" data-prev="'+esc(r.date)+'" value="'+esc(r.date)+'"></td>'+
+    '<td class="pre">'+esc(r.address||'—')+'</td><td>'+check_(r.spec)+'</td><td>'+check_(r.sendWait)+'</td>'+
+    '<td><button class="secondary" data-edit2="'+esc(r.id)+'">수정</button></td></tr>').join('')+'</tbody></table></div>';
+  bindDateInputs(t);
+}
+function renderInboundWait(rows){
+  const t=$('inboundWaitBox');
+  if(!rows.length){t.innerHTML='<div class="empty">본사납품 필요(입고 대기) 항목이 없습니다. ✅</div>';return;}
+  t.innerHTML='<div class="table-wrap"><table><thead><tr><th>No.</th><th>거래처</th><th>납품형태</th><th>납품요청일</th><th>납품일자</th><th>발주서발송</th><th>발주서 번호</th><th>관리</th></tr></thead><tbody>'+
+    rows.map((r,i)=>'<tr><td>'+(i+1)+'</td><td class="pre">'+esc(r.client||r.title)+'</td><td>'+esc(r.type||'—')+'</td><td>'+esc(weekday_(r.request))+'</td>'+
+    '<td><input type="date" class="date-cell" data-page-id="'+esc(r.id)+'" data-prev="'+esc(r.date)+'" value="'+esc(r.date)+'"></td>'+
+    '<td>'+check_(r.poSent)+'</td><td>'+esc(r.poNo||'—')+'</td>'+
+    '<td><button class="secondary" data-edit2="'+esc(r.id)+'">수정</button></td></tr>').join('')+'</tbody></table></div>';
+  bindDateInputs(t);
+}
+function renderRecent(rows){
+  const t=$('recentBox');
+  if(!rows.length){t.innerHTML='<div class="empty">최근 7일 동안 납품 기록이 없습니다.</div>';return;}
+  t.innerHTML='<div class="table-wrap"><table><thead><tr><th>No.</th><th>거래처</th><th>납품일자</th><th>상태</th><th>박스히어로</th><th>택배비</th><th>명세표 발송</th><th>관리</th></tr></thead><tbody>'+
+    rows.map((r,i)=>'<tr><td>'+(i+1)+'</td><td class="pre">'+esc(r.client||r.title)+'</td><td>'+esc(r.date||'—')+'</td><td>'+esc(r.status||'—')+'</td><td>'+check_(r.boxhero)+'</td><td>'+esc(fmtN_(r.courier))+'</td><td>'+check_(r.specSend)+'</td>'+
+    '<td><button class="secondary" data-edit2="'+esc(r.id)+'">수정</button></td></tr>').join('')+'</tbody></table></div>';
+  t.querySelectorAll('[data-edit2]').forEach(b=>b.addEventListener('click',()=>openEdit('inouts',b.dataset.edit2)));
+}
+
+/* ── 요청사항 2: 총판 통계 ── */
+function statCard_(label,val,cls){return '<div class="stat-card '+(cls||'')+'"><div class="stat-label">'+esc(label)+'</div><div class="stat-value">'+val+'</div></div>';}
+async function loadStats(){
+  const box=$('statsBody');box.innerHTML='<div class="empty"><span class="spinner"></span> 통계 집계 중</div>';
+  try{STATS=await api('getStats',{});renderStats();}catch(e){box.innerHTML='<div class="notice error">'+esc(e.message)+'</div>';}
+}
+function renderStats(){
+  const s=STATS;$('statsBasis').textContent='집계 기준일: '+esc(s.basis.dateField)+' · '+s.basis.year+'년 · 미수금 = '+esc(s.basis.unpaidFormula);
+  const m=s.monthly;let h='';
+  h+='<h3>핵심 요약</h3><div class="stat-grid">'+statCard_('총 미수금',fmtN_(s.summary.unpaid)+'원','warn')+statCard_('올해 평균 Profit',fmtN_(s.summary.avgProfitThis))+statCard_('작년 평균 Profit',fmtN_(s.summary.avgProfitLast))+'</div>';
+  h+='<div class="stat-grid">'+statCard_('올해 평균 출고수량',fmtN_(s.summary.avgOutThis))+statCard_('올해 평균 입고수량',fmtN_(s.summary.avgInThis))+'</div>';
+  h+='<h3>택배비</h3><div class="stat-grid">'+statCard_('당월 택배비',fmtN_(s.summary.courierMonth)+'원')+statCard_('전월 택배비',fmtN_(s.summary.courierPrev)+'원')+statCard_('올해 총 택배비',fmtN_(s.summary.courierYear)+'원')+'</div>';
+  h+='<h3>작년('+(s.basis.year-1)+') 실적</h3><div class="stat-grid">'+statCard_('작년 총 입고량',fmtN_(s.summary.inQtyLast))+statCard_('작년 총 입금액',fmtN_(s.summary.inPaidLast)+'원')+statCard_('작년 총 출고량',fmtN_(s.summary.outQtyLast))+statCard_('작년 총 판매금',fmtN_(s.summary.salesLast)+'원')+'</div>';
+  const row6=(title,arr,unit)=>{let a='<h3>'+title+'</h3><div class="stat-grid">';for(let i=0;i<6;i++)a+=statCard_((i+1)+'월',fmtN_(arr[i])+(unit||''));a+='</div>';let b='<div class="stat-grid">';for(let i=6;i<12;i++)b+=statCard_((i+1)+'월',fmtN_(arr[i])+(unit||''));return a+b+'</div>';};
+  h+=row6('월별 총 판매수량 (1~6월 / 7~12월)',m.salesQty,'개');
+  h+=row6('월별 총 입고수량 (1~6월 / 7~12월)',m.inQty,'개');
+  h+=row6('월별 Profit (1~6월 / 7~12월)',m.profit,'원');
+  h+=row6('월별 총 판매금 (1~6월 / 7~12월)',m.sales,'원');
+  h+=row6('월별 총 입고액 (1~6월 / 7~12월)',m.inAmt,'원');
+  box.innerHTML=h;
+}
+async function searchStats(){
+  const box=$('searchStatsBox');
+  const start=$('searchStart').value,end=$('searchEnd').value;
+  if(!start||!end){toast('시작일과 종료일을 모두 선택해주세요.');return;}
+  box.innerHTML='<div class="empty"><span class="spinner"></span> 집계 중</div>';
+  try{
+    const r=await api('searchStats',{start:start,end:end});
+    box.innerHTML='<div class="muted" style="margin:8px 0">'+esc(r.start)+' ~ '+esc(r.end)+' 집계 결과</div><div class="stat-grid">'+
+      statCard_('판매수량',fmtN_(r.salesQty)+'개')+statCard_('판매금',fmtN_(r.sales)+'원')+statCard_('입고수량',fmtN_(r.inQty)+'개')+
+      statCard_('입고액',fmtN_(r.inAmt)+'원')+statCard_('Profit',fmtN_(r.profit)+'원')+statCard_('택배비',fmtN_(r.courier)+'원')+'</div>';
+  }catch(e){box.innerHTML='<div class="notice error">'+esc(e.message)+'</div>';}
+}
+
+/* ── 거래처 관리 (기존 로직 유지) ── */
+async function loadList(key,reset=false){try{if(reset){listState[key].cursor=null;listState[key].search=$(key+'Search').value.trim();$(key+'Table').innerHTML='<div class="empty"><span class="spinner"></span> Notion 조회 중</div>';}const data=await api('listPages',{dbKey:key,search:listState[key].search,cursor:reset?null:listState[key].cursor,pageSize:100});renderList(key,data,reset);listState[key].cursor=data.nextCursor;$('clientsMore').classList.toggle('hidden',!data.hasMore);}catch(e){$('clientsTable').innerHTML='<div class="notice error">'+esc(e.message)+'</div>';}}
+function renderList(key,data,reset){const target=$('clientsTable');if(reset)target.innerHTML='<div class="table-wrap"><table><thead><tr><th>페이지명</th><th>주요 정보</th><th>최근 수정</th><th>관리</th></tr></thead><tbody id="clientsRows"></tbody></table></div>';const body=$('clientsRows');if(!data.pages.length&&reset){target.innerHTML='<div class="empty">조회 결과가 없습니다.</div>';return;}if(!body)return;
+  data.pages.forEach(p=>{const summary=['연락처','도로명주소','총 출고량'].map(k=>p.values[k]!==undefined&&p.values[k]!==''?k+': '+(Array.isArray(p.values[k])?p.values[k].join(', '):p.values[k]):'').filter(Boolean).join(' · ');
+  const tr=document.createElement('tr');tr.innerHTML='<td><div class="row-title">'+esc(p.title||'(제목 없음)')+'</div><div class="history-meta">'+esc(p.id)+'</div></td><td>'+esc(summary||'—')+'</td><td>'+esc((p.editedTime||'').replace('T',' ').slice(0,16))+'</td><td><div class="row-actions"><button class="primary" data-edit="'+esc(p.id)+'">수정</button><button class="danger" data-archive="'+esc(p.id)+'">보관</button></div></td>';body.appendChild(tr);});
+  body.querySelectorAll('[data-edit]').forEach(b=>b.addEventListener('click',()=>openEdit('clients',b.dataset.edit)));
+  body.querySelectorAll('[data-archive]').forEach(b=>b.addEventListener('click',()=>archive('clients',b.dataset.archive)));}
+async function openEdit(key,pageId){try{const data=await api('getPage',{dbKey:key,pageId});currentEdit={dbKey:key,pageId:pageId};activeSchema=data.schema;activeRelationOptions=data.relationOptions||{};isNewClient=false;$('modalTitle').textContent=(key==='clients'?'거래처':'입출고')+' 정보 수정';$('modalSub').textContent=data.page.title+' · 변경 전/후 값 자동 기록';$('modalNotice').innerHTML='<div class="notice">저장 버튼을 누르면 확인 팝업(예/아니오) 후 변경된 속성만 Notion에 반영하고, As is / To be 값이 변경 이력 Log에 누적됩니다.</div>';renderForm(data.schema,data.page.values,false);$('editModal').classList.remove('hidden');}catch(e){toast(e.message,5000)}}
 function openNewClient(){const schema=INIT.databases.clients.properties;currentEdit={dbKey:'clients',pageId:null};activeSchema=schema;activeRelationOptions={};isNewClient=true;$('modalTitle').textContent='신규 거래처 등록';$('modalSub').textContent='거래처 DB에 새 페이지를 생성합니다.';$('modalNotice').innerHTML='<div class="notice">신규 생성된 거래처의 입력 속성은 모두 변경 이력에 기록됩니다. 자동 계산 속성은 입력하지 않습니다.</div>';renderForm(schema,{},true);$('editModal').classList.remove('hidden');}
 function openReuseClient(pageId,name){api('getPage',{dbKey:'clients',pageId}).then(data=>{currentEdit={dbKey:'clients',pageId};activeSchema=data.schema;activeRelationOptions=data.relationOptions||{};isNewClient=false;$('modalTitle').textContent='휴면 거래처 재사용';$('modalSub').textContent=name+' · 저장 직전에 재사용 조건을 서버에서 다시 확인합니다.';$('modalNotice').innerHTML='<div class="notice warning">총 출고량 0 + 연결 입출고 페이지 0건을 서버에서 다시 검증합니다. 검증에 실패하면 기존 페이지는 수정되지 않습니다.</div>';renderForm(data.schema,data.page.values,false);$('editModal').classList.remove('hidden');currentEdit.reuse=true;}).catch(e=>toast(e.message,5000));}
 function renderForm(schema,values,isCreate){initialFormValues=JSON.parse(JSON.stringify(values||{}));const form=$('editForm');form.innerHTML='';schema.forEach(s=>{const wrap=document.createElement('div');wrap.className='field'+(['rich_text'].includes(s.type)?' wide':'');const label=document.createElement('label');label.textContent=s.name+'  ·  '+s.type;wrap.appendChild(label);let el;const val=values[s.name]===undefined?'':values[s.name];if(!s.editable){el=document.createElement('input');el.disabled=true;el.className='read-only';el.value=Array.isArray(val)?val.join(', '):String(val);wrap.appendChild(el);const hint=document.createElement('small');hint.textContent='자동 계산 / 롤업 / 시스템 속성 - 읽기 전용';wrap.appendChild(hint);form.appendChild(wrap);return;}
@@ -101,29 +266,47 @@ el.dataset.prop=s.name;el.dataset.type=s.type;wrap.appendChild(el);if(s.name==='
 const road=schema.some(x=>x.name==='도로명주소'),jibun=schema.some(x=>x.name==='지번주소');if(road||jibun){const address=document.createElement('div');address.className='field wide';address.innerHTML='<label>주소 검색</label><div class="address-tools"><button type="button" class="secondary" id="postcodeBtn">다음 주소 검색</button><span class="muted">검색 결과의 도로명주소·지번주소를 해당 입력란에 자동 입력합니다.</span></div>';form.prepend(address);$('postcodeBtn').addEventListener('click',openPostcode);}}
 function openPostcode(){if(!window.daum||!daum.Postcode){toast('다음 주소 검색 서비스를 불러오지 못했습니다.',5000);return;}new daum.Postcode({oncomplete:function(data){const road=$('editForm').querySelector('[data-prop="도로명주소"]');const jibun=$('editForm').querySelector('[data-prop="지번주소"]');if(road)road.value=data.roadAddress||data.autoRoadAddress||'';if(jibun)jibun.value=data.jibunAddress||data.autoJibunAddress||'';toast('도로명주소와 지번주소를 입력했습니다. 홈택스주소는 필요 시 별도로 입력해주세요.');}}).open();}
 function collectForm(){const values={};$('editForm').querySelectorAll('[data-prop]').forEach(el=>{const n=el.dataset.prop,t=el.dataset.type;let v;if(t==='checkbox')v=el.checked;else if(t==='multi_select'||t==='relation'){v=el.tagName==='SELECT'?Array.from(el.selectedOptions).map(x=>x.value).filter(Boolean):el.value;}else if(t==='date')v=(el.value===String(el.dataset.originalDate||'').slice(0,10)&&el.dataset.originalDate)?el.dataset.originalDate:el.value;else v=el.value;const old=initialFormValues[n]===undefined?'':initialFormValues[n];const norm=x=>Array.isArray(x)?x.slice().sort():x;if(isNewClient||JSON.stringify(norm(v))!==JSON.stringify(norm(old)))values[n]=v;});return values;}
-async function saveModal(){const btn=$('modalSave');setBusy(btn,true);try{const values=collectForm();let result;if(isNewClient)result=await api('createClient',{values});else if(currentEdit.reuse)result=await api('reuseDormantClient',{pageId:currentEdit.pageId,values});else result=await api('updatePage',{dbKey:currentEdit.dbKey,pageId:currentEdit.pageId,values});$('editModal').classList.add('hidden');toast(result.message||'저장했습니다.');if(currentEdit.dbKey==='clients')await loadList('clients',true);else await loadList('inouts',true);if(currentTab==='history')await loadHistory();}catch(e){$('modalNotice').innerHTML='<div class="notice error">'+esc(e.message)+'</div>';toast(e.message,5000);}finally{setBusy(btn,false);}}
+async function saveModal(){
+  const btn=$('modalSave');
+  const values=collectForm();const changed=Object.keys(values).length;
+  if(!isNewClient&&changed===0){toast('변경된 내용이 없습니다.');return;}
+  /* 요청사항 4: 저장 직전 Yes/No 확인 팝업 */
+  if(!confirm('저장 및 이력 기록을 진행할까요?\n\n· 변경 속성 '+changed+'건이 Notion에 반영됩니다.\n· 변경 전/후 값이 변경 이력 Log에 기록됩니다.\n\n[예]를 누르면 저장이 진행됩니다.'))return;
+  setBusy(btn,true);
+  try{let result;
+    if(isNewClient)result=await api('createClient',{values});
+    else if(currentEdit.reuse)result=await api('reuseDormantClient',{pageId:currentEdit.pageId,values});
+    else result=await api('updatePage',{dbKey:currentEdit.dbKey,pageId:currentEdit.pageId,values});
+    $('editModal').classList.add('hidden');toast(result.message||'저장했습니다.');
+    await loadList('clients',true);if(currentTab==='history')await loadHistory();
+  }catch(e){$('modalNotice').innerHTML='<div class="notice error">'+esc(e.message)+'</div>';toast(e.message,5000);}finally{setBusy(btn,false);}}
 async function archive(key,id){if(!confirm('이 페이지를 보관(삭제)할까요?\n영구 삭제가 아닌 Notion 휴지통으로 이동합니다.'))return;try{const r=await api('archivePage',{dbKey:key,pageId:id});toast(r.message);await loadList(key,true);if(currentTab==='history')loadHistory();}catch(e){alert(e.message)}}
 async function loadDormant(){const box=$('dormantCandidates');box.innerHTML='<div class="empty"><span class="spinner"></span> 휴면 후보 확인 중</div>';try{const r=await api('dormantCandidates');if(!r.length){box.innerHTML='<div class="empty">총 출고량 0인 거래처 후보가 없습니다.</div>';return;}box.innerHTML='<div class="notice">아래 후보는 총 출고량만 0인 1차 후보입니다. 실제 재사용은 선택 후 저장할 때 연결 입출고 0건까지 서버가 재검증합니다.</div><div class="table-wrap"><table><thead><tr><th>기존 거래처명</th><th>페이지 ID</th><th>작업</th></tr></thead><tbody>'+r.map(x=>'<tr><td>'+esc(x.name)+'</td><td>'+esc(x.id)+'</td><td><button class="secondary" data-reuse="'+esc(x.id)+'" data-name="'+esc(x.name)+'">이 페이지 재사용</button></td></tr>').join('')+'</tbody></table></div>';box.querySelectorAll('[data-reuse]').forEach(b=>b.addEventListener('click',()=>openReuseClient(b.dataset.reuse,b.dataset.name)));}catch(e){box.innerHTML='<div class="notice error">'+esc(e.message)+'</div>';}}
-async function loadHistory(){const target=$('historyTable');target.innerHTML='<div class="empty"><span class="spinner"></span> 변경 이력 조회 중</div>';try{const r=await api('getHistory',{db:$('historyDb').value,keyword:$('historyKeyword').value.trim(),action:$('historyAction').value});const link=$('auditSheetLink');link.href=r.spreadsheetUrl;link.classList.remove('hidden');if(!r.rows.length){target.innerHTML='<div class="empty">변경 이력이 없습니다. (웹앱 설치 이후 기록부터 누적됩니다.)</div>';return;}target.innerHTML='<div class="muted" style="margin-bottom:8px">검색 결과 '+r.total.toLocaleString()+'건 · 최신순 최대 500건 표시</div><div class="table-wrap"><table><thead><tr><th>기록일시</th><th>작업</th><th>DB / 페이지</th><th>속성</th><th>As is</th><th>To be</th><th>관리</th></tr></thead><tbody>'+r.rows.map(x=>'<tr><td>'+esc(x.timestamp)+'</td><td><span class="pill">'+esc(x.action)+'</span></td><td>'+esc(x.db)+'<div class="history-meta">'+esc(x.titleBefore||x.titleAfter)+'<br>'+esc(x.pageId)+'</div></td><td>'+esc(x.property)+'</td><td><div class="log-change">'+esc(x.before)+'</div></td><td><div class="log-change">'+esc(x.after)+'</div></td><td>'+(x.action==='보관(삭제)'?'<button class="secondary" data-restore="'+esc(x.pageId)+'" data-db="'+(x.db==='거래처 DB'?'clients':'inouts')+'">복원</button>':'—')+'</td></tr>').join('')+'</tbody></table></div>';target.querySelectorAll('[data-restore]').forEach(b=>b.addEventListener('click',async()=>{if(!confirm('이 페이지를 복원할까요?'))return;try{const x=await api('restorePage',{dbKey:b.dataset.db,pageId:b.dataset.restore});toast(x.message);loadHistory();}catch(e){alert(e.message)}}));}catch(e){target.innerHTML='<div class="notice error">'+esc(e.message)+'</div>';}}
+async function loadHistory(){const target=$('historyTable');target.innerHTML='<div class="empty"><span class="spinner"></span> 변경 이력 조회 중</div>';try{const r=await api('getHistory',{db:$('historyDb').value,keyword:$('historyKeyword').value.trim(),actionFilter:$('historyAction').value});const link=$('auditSheetLink');link.href=r.spreadsheetUrl;link.classList.remove('hidden');
+if(!r.rows.length){target.innerHTML='<div class="empty">변경 이력이 없습니다. (웹앱 설치 이후 기록부터 누적됩니다.)</div>';return;}
+target.innerHTML='<div class="muted" style="margin-bottom:8px">검색 결과 '+r.total.toLocaleString()+'건 · 최신순 최대 500건 표시</div><div class="table-wrap"><table><thead><tr><th>기록일시</th><th>작업</th><th>DB / 페이지</th><th>속성</th><th>As is</th><th>To be</th><th>관리</th></tr></thead><tbody>'+r.rows.map(x=>'<tr><td>'+esc(x.timestamp)+'</td><td><span class="pill">'+esc(x.action)+'</span></td><td>'+esc(x.db)+'<div class="history-meta">'+esc(x.titleBefore||x.titleAfter)+'<br>'+esc(x.pageId)+'</div></td><td>'+esc(x.property)+'</td><td><div class="log-change">'+esc(x.before)+'</div></td><td><div class="log-change">'+esc(x.after)+'</div></td><td>'+(x.action==='보관(삭제)'?'<button class="secondary" data-restore="'+esc(x.pageId)+'" data-db="'+(x.db==='거래처 DB'?'clients':'inouts')+'">복원</button>':'—')+'</td></tr>').join('')+'</tbody></table></div>';
+target.querySelectorAll('[data-restore]').forEach(b=>b.addEventListener('click',async()=>{if(!confirm('이 페이지를 복원할까요?'))return;try{const x=await api('restorePage',{dbKey:b.dataset.db,pageId:b.dataset.restore});toast(x.message);loadHistory();}catch(e){alert(e.message)}}));}catch(e){target.innerHTML='<div class="notice error">'+esc(e.message)+'</div>';}}
 
-$('loginBtn').addEventListener('click',login);$('pinInput').addEventListener('keydown',e=>{if(e.key==='Enter')login()});$('logoutBtn').addEventListener('click',logout);document.querySelectorAll('.tab').forEach(b=>b.addEventListener('click',()=>switchTab(b.dataset.tab)));
+/* ── 이벤트 바인딩 ── */
+document.querySelectorAll('.tab').forEach(b=>b.addEventListener('click',()=>switchTab(b.dataset.tab)));
+$('manualBtn').addEventListener('click',()=>$('manualModal').classList.remove('hidden'));
+$('manualClose').addEventListener('click',()=>$('manualModal').classList.add('hidden'));
 $('clientsSearchBtn').addEventListener('click',()=>loadList('clients',true));$('clientsReload').addEventListener('click',()=>loadList('clients',true));$('clientsSearch').addEventListener('keydown',e=>{if(e.key==='Enter')loadList('clients',true)});$('clientsMore').addEventListener('click',()=>loadList('clients',false));
-$('inoutsSearchBtn').addEventListener('click',()=>loadList('inouts',true));$('inoutsReload').addEventListener('click',()=>loadList('inouts',true));$('inoutsSearch').addEventListener('keydown',e=>{if(e.key==='Enter')loadList('inouts',true)});$('inoutsMore').addEventListener('click',()=>loadList('inouts',false));
 $('clientsAdd').addEventListener('click',()=>{switchTab('newclient');openNewClient()});$('newClientBtn').addEventListener('click',openNewClient);$('dormantLoadBtn').addEventListener('click',loadDormant);
-$('historySearchBtn').addEventListener('click',loadHistory);$('historyKeyword').addEventListener('keydown',e=>{if(e.key==='Enter')loadHistory()});$('modalClose').addEventListener('click',()=>$('editModal').classList.add('hidden'));$('modalCancel').addEventListener('click',()=>$('editModal').classList.add('hidden'));$('modalSave').addEventListener('click',saveModal);
+$('historySearchBtn').addEventListener('click',loadHistory);$('historyKeyword').addEventListener('keydown',e=>{if(e.key==='Enter')loadHistory()});
+$('searchStatsBtn').addEventListener('click',searchStats);
+$('modalClose').addEventListener('click',()=>$('editModal').classList.add('hidden'));$('modalCancel').addEventListener('click',()=>$('editModal').classList.add('hidden'));$('modalSave').addEventListener('click',saveModal);
+boot();
 </script>
 <script>
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', function () {
     navigator.serviceWorker.register('./sw.js')
-      .then(function (registration) {
-        console.log('서비스워커 등록 완료:', registration.scope);
-      })
-      .catch(function (error) {
-        console.error('서비스워커 등록 실패:', error);
-      });
+      .then(function (registration) { console.log('서비스워커 등록 완료:', registration.scope); })
+      .catch(function (error) { console.error('서비스워커 등록 실패:', error); });
   });
 }
 </script>
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous"></script>
 </body>
 </html>

@@ -116,7 +116,7 @@
 
 <div id="toast" style="position:fixed;bottom:18px;left:50%;transform:translateX(-50%);z-index:120;max-width:92vw;background:#172033;color:#fff;padding:12px 16px;border-radius:12px;box-shadow:var(--shadow);display:none;font-size:13px"></div>
 <script>
-const GAS_URL = 'https://script.google.com/macros/s/AKfycbyACaJDFXTKUT6lZ03cRDOT1bW2bioSAkaCsq0Vm05fpmQ_xNYplXMPH-1IGIv1HQPP-Q/exec';   // ← 배포한 GAS 웹앱 주소를 여기에 입력
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbwbNvo5MCHTq7vlBm5VQ4gAOzTnqOyG7qnPeQ_nH9J_F0DNEqZikg-4NvL26W7AhJQhug/exec';   // ← 배포한 GAS 웹앱 주소를 여기에 입력
 let INIT = null, STATS = null, DASH = null;
 let currentTab = 'dashboard', currentEdit = null;
 let listState = {clients:{cursor:null,search:''}};
@@ -231,7 +231,7 @@ function renderStats(){
   h+=row6('월별 Profit (1~6월 / 7~12월)',m.profit,'원');
   h+=row6('월별 총 판매금 (1~6월 / 7~12월)',m.sales,'원');
   h+=row6('월별 총 입고액 (1~6월 / 7~12월)',m.inAmt,'원');
-  box.innerHTML=h;
+  $('statsBody').innerHTML=h;
 }
 async function searchStats(){
   const box=$('searchStatsBox');
@@ -307,6 +307,7 @@ if ('serviceWorker' in navigator) {
   });
 }
 </script>
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous"></script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous"></script>
 </body>
 </html>

@@ -20,12 +20,16 @@ button:disabled{opacity:.45;cursor:not-allowed}
 .primary{background:var(--blue);color:#fff}.secondary{background:#eef1f6;color:#293449}
 .danger{background:#fff0f0;color:var(--red);border:1px solid #ffd5d5}
 .ghost{background:#fff;border:1px solid var(--line);color:#344054}
-/* ── 상단 바 ── */
-.top{background:var(--navy);color:#fff;padding:16px max(16px,calc((100vw - 1200px)/2));display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:nowrap}
-.brand{font-size:18px;font-weight:800;letter-spacing:-.3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.top-right{display:flex;gap:6px;align-items:center;flex-shrink:0}
-.top-right button{font-size:12px;padding:7px 11px;white-space:nowrap;flex-shrink:0}
-#connectionLabel{font-size:11px;padding:5px 9px;border-radius:999px;white-space:nowrap;background:#26364e;color:#dbe5f5}
+/* ── 상단 바 (★ 무조건 한 줄) ── */
+.top{background:var(--navy);color:#fff;padding:14px max(14px,calc((100vw - 1200px)/2));display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:nowrap;overflow:hidden}
+.brand{font-size:17px;font-weight:800;letter-spacing:-.3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;flex:1 1 auto}
+.brand-min{display:none}
+.top-right{display:flex;gap:5px;align-items:center;flex-shrink:0;flex-wrap:nowrap}
+.top-right button{font-size:11.5px;padding:6px 9px;white-space:nowrap;flex-shrink:0;border-radius:8px}
+#refreshBtn{display:inline-flex;align-items:center;gap:3px;padding:6px 8px;font-size:11.5px;background:#24354e;border:1px solid #33465f;color:#e6edf9}
+#refreshBtn .ic{font-size:14px;line-height:1;display:inline-block;transform:translateY(-.5px)}
+#refreshBtn.spinning .ic{animation:spin .9s linear infinite}
+#connectionLabel{font-size:10.5px;padding:4px 8px;border-radius:999px;white-space:nowrap;background:#26364e;color:#dbe5f5;flex-shrink:0}
 #connectionLabel.on{background:#153a2a;color:#7ee2a8}
 #connectionLabel.off{background:#4a1f1f;color:#ffb4b4}
 /* ── 본문 ── */
@@ -76,63 +80,106 @@ td{padding:8px;border-bottom:1px solid #f1f4f8;vertical-align:middle}
 .pre{white-space:pre-line;max-width:250px;min-width:120px;line-height:1.45}
 .history-meta{font-size:11px;color:#98a2b3;word-break:break-all}
 .log-change{max-width:210px;white-space:pre-wrap;word-break:break-all;font-size:12px}
-/* ── 통계 카드 ── */
-.stat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(126px,1fr));gap:8px;margin:8px 0 4px}
-.stat-card{background:linear-gradient(180deg,#fff,#f7f9fd);border:1px solid var(--line);border-radius:12px;padding:10px 8px;text-align:center;min-width:0}
-.stat-label{font-size:11px;color:var(--muted);margin-bottom:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.stat-value{font-size:15px;font-weight:800;word-break:keep-all}
-.stat-card.warn{background:linear-gradient(180deg,#fff,#fff6f0);border-color:#ffd9bd}
-.stat-card.warn .stat-value{color:#b54708}
-.stat-sub{font-size:10px;color:#98a2b3;margin-top:3px}
+/* ══════ ① 제품별 현황 : 한 장의 표 ══════ */
+.pt-wrap{border:1px solid #dfe5ee;border-radius:13px;overflow:hidden;background:#fff;box-shadow:0 1px 3px rgba(16,24,39,.04)}
+.pt{border-collapse:collapse;table-layout:fixed;width:100%}
+.pt th,.pt td{padding:8px 3px;text-align:center;border-bottom:1px solid #eef1f6;overflow:hidden}
+.pt tr:last-child th,.pt tr:last-child td{border-bottom:0}
+.pt thead th{background:var(--navy);color:#fff;font-weight:800;font-size:12px;white-space:nowrap;text-overflow:ellipsis;letter-spacing:-.2px}
+.pt thead th.pt-k{background:#1b2a44;font-size:10px;color:#9fb2cd;letter-spacing:-.3px}
+.pt tbody th{width:31%;text-align:left;padding-left:8px;background:#f8fafc;color:#475467;font-size:10.5px;font-weight:800;white-space:nowrap;letter-spacing:-.4px}
+.pt td.v{font-weight:800;font-size:15px;letter-spacing:-.6px;white-space:nowrap;color:#0b2f7a}
+.pt td.v.blue{background:#e9f0ff}
+.pt td.v.mint{background:#e8f8f0;color:#0c6844}
+.pt td.d{font-size:10.5px;font-weight:800;color:#344054;white-space:nowrap;letter-spacing:-.5px;padding:8px 1px}
+.pt td.d .ago{color:#98a2b3;font-weight:700}
+.pt td.d.warn .ago{color:#b54708}
+.pt-empty{padding:22px;text-align:center;color:var(--muted);font-size:13px}
+/* ══════ 총판 통계 카드 (컬러) ══════ */
+.stat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(128px,1fr));gap:8px;margin:8px 0 4px}
+.stat-card{position:relative;background:#fff;border:1px solid var(--line);border-radius:12px;padding:11px 8px 10px;text-align:center;min-width:0;overflow:hidden}
+.stat-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;background:#cfd8e6}
+.stat-label{font-size:10.5px;color:#667085;margin-bottom:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:700}
+.stat-value{font-size:15px;font-weight:800;letter-spacing:-.6px;word-break:keep-all;line-height:1.25}
+.stat-sub{font-size:9.5px;color:#98a2b3;margin-top:4px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.stat-card.c-blue{background:linear-gradient(180deg,#fff,#f2f6ff)} .stat-card.c-blue::before{background:#2457d6} .stat-card.c-blue .stat-value{color:#1b46b8}
+.stat-card.c-green{background:linear-gradient(180deg,#fff,#f1fbf6)} .stat-card.c-green::before{background:#12a06a} .stat-card.c-green .stat-value{color:#0c6844}
+.stat-card.c-amber{background:linear-gradient(180deg,#fff,#fff9ef)} .stat-card.c-amber::before{background:#f0a020} .stat-card.c-amber .stat-value{color:#a35b00}
+.stat-card.c-rose{background:linear-gradient(180deg,#fff,#fff5f5)} .stat-card.c-rose::before{background:#d94a4a} .stat-card.c-rose .stat-value{color:#b02a2a}
+.stat-card.c-violet{background:linear-gradient(180deg,#fff,#f8f4ff)} .stat-card.c-violet::before{background:#7c4ddb} .stat-card.c-violet .stat-value{color:#5b32b0}
+.stat-card.c-teal{background:linear-gradient(180deg,#fff,#f0fbfc)} .stat-card.c-teal::before{background:#0f9aa8} .stat-card.c-teal .stat-value{color:#0a6f7a}
+.stat-card.c-slate{background:linear-gradient(180deg,#fff,#f7f9fc)} .stat-card.c-slate::before{background:#64748b} .stat-card.c-slate .stat-value{color:#334155}
+/* ══════ 월별 카드 (수량 + 금액 동시) ══════ */
+.mo-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:7px;margin:8px 0 6px}
+.mo-cell{border:1px solid #e3e9f3;border-radius:11px;padding:7px 4px 6px;background:linear-gradient(180deg,#fff,#f7f9fd);text-align:center;min-width:0;overflow:hidden}
+.mo-m{font-size:10px;font-weight:800;color:#8a94a6;letter-spacing:-.3px}
+.mo-q{margin-top:4px;border-radius:7px;padding:3px 0;background:#eaf0ff;color:#1b46b8;font-size:11px;font-weight:800;letter-spacing:-.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mo-a{margin-top:3px;border-radius:7px;padding:3px 0;background:#f2f4f8;color:#475467;font-size:9.5px;font-weight:700;letter-spacing:-.4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mo-cell.green .mo-q{background:#e8f8f0;color:#0c6844}
+.mo-cell.violet .mo-q{background:#f4eeff;color:#5b32b0}
+.mo-cell.violet .mo-a{background:#faf7ff;color:#6b5a92}
 /* ── 납품일자 입력칸 ── */
 .date-cell{border:1px solid #d0d5dd;border-radius:8px;padding:6px 8px;min-height:36px;background:#fff;font-size:12.5px;max-width:132px;width:132px}
 .date-cell:focus{outline:2px solid #c7d6ff;border-color:#7899ff}
 .date-cell.saving{border-color:#ffb020;background:#fffdf5}
 .date-cell.saved{border-color:#7ee2a8;background:#f4fff9}
-/* ── 제품 카드 ── */
-.prod-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:10px;margin:8px 0}
-.prod-card{border:1px solid var(--line);border-radius:14px;padding:13px;background:linear-gradient(180deg,#fff,#f6f8fc)}
-.prod-card .name{font-weight:800;font-size:14px;margin-bottom:8px;color:var(--navy)}
-.prod-card .row{display:flex;justify-content:space-between;align-items:baseline;gap:8px;font-size:12.5px;padding:5px 0;border-top:1px dashed #eef1f6}
-.prod-card .row:first-of-type{border-top:0}
-.prod-card .row b{font-size:13px;text-align:right}
-.prod-card .row .warn{color:#b54708}
 .manual-body{max-height:66vh;overflow:auto;font-size:13.5px;line-height:1.78}
 .manual-body h4{margin:16px 0 6px;color:var(--navy)}
 .manual-body li{margin:3px 0}
 .manual-body code{background:#f2f4f7;padding:1px 5px;border-radius:5px;font-size:12px}
+.manual-body .box{background:#f8fafc;border:1px solid var(--line);border-radius:9px;padding:9px 11px;margin:6px 0;font-size:12.5px;line-height:1.65}
 /* ── 모바일 ── */
+@media(max-width:760px){
+  .mo-grid{grid-template-columns:repeat(4,1fr);gap:6px}
+}
 @media(max-width:700px){
-  .top{padding:12px 13px;gap:8px}
+  .top{padding:11px 12px;gap:6px}
   .brand{font-size:15px}
-  #connectionLabel{font-size:10.5px;padding:4px 7px}
-  .top-right button{font-size:11.5px;padding:6px 9px;border-radius:8px}
+  .brand-full{display:none}
+  .brand-min{display:inline}
+  #connectionLabel{font-size:10px;padding:4px 6px}
+  .top-right button{font-size:11px;padding:6px 7px}
+  #refreshBtn{padding:6px 7px;font-size:11px}
   .wrap{margin:12px auto;padding:0 11px}
   .panel{padding:14px 12px;border-radius:14px}
   .form-grid{grid-template-columns:1fr}
   .form-grid .wide{grid-column:auto}
   .toolbar input,.toolbar select{min-width:100%}
   .modal{padding:15px}
-  /* ★ 한 줄 3개 버튼 (5개 → 2줄) */
+  /* ★ 탭 5개 → 한 줄 3개(2줄) */
   .tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
   .tab{padding:9px 4px;font-size:11.5px;white-space:nowrap;letter-spacing:-.4px}
   .stat-grid{grid-template-columns:repeat(3,1fr);gap:6px}
-  .stat-card{padding:8px 4px;border-radius:10px}
-  .stat-value{font-size:12.5px}
-  .stat-label{font-size:10px}
-  .stat-sub{font-size:9.5px}
-  .prod-grid{grid-template-columns:1fr}
+  .stat-card{padding:9px 4px 8px;border-radius:10px}
+  .stat-value{font-size:12.5px;letter-spacing:-.5px}
+  .stat-label{font-size:9.5px;letter-spacing:-.3px}
+  .stat-sub{font-size:9px}
+  .pt thead th{font-size:11px}
+  .pt td.v{font-size:14px}
+  .pt td.d{font-size:10px;letter-spacing:-.6px}
+  .pt tbody th{font-size:10px;padding-left:6px}
+  .mo-grid{grid-template-columns:repeat(4,1fr);gap:5px}
+  .mo-q{font-size:10.5px}
+  .mo-a{font-size:9px}
   table{font-size:12px}
   th,td{padding:7px 6px}
   .date-cell{width:124px;max-width:124px}
+}
+@media(max-width:380px){
+  .pt tbody th{width:27%;font-size:9.5px;letter-spacing:-.6px;padding-left:5px}
+  .pt td.d{font-size:9.5px;letter-spacing:-.7px}
+  .pt thead th{font-size:10.5px}
+  .mo-q{font-size:10px}
+  .mo-a{font-size:8.5px}
 }
 </style>
 </head>
 <body>
 <header class="top">
-  <div class="brand">푸로찜 거래처 · 입출고 관리</div>
+  <div class="brand"><span class="brand-full">푸로찜 거래처 · 입출고 관리</span><span class="brand-min">푸로찜 관리</span></div>
   <div class="top-right">
     <span id="connectionLabel">확인 중</span>
+    <button id="refreshBtn" type="button" aria-label="새로고침" title="새로고침"><span class="ic">⟳</span>새로고침</button>
     <button class="ghost" id="manualBtn">매뉴얼</button>
   </div>
 </header>
@@ -146,7 +193,7 @@ td{padding:8px;border-bottom:1px solid #f1f4f8;vertical-align:middle}
   </nav>
 
   <section id="dashboardPanel" class="panel">
-    <h3 style="margin-top:0">① 푸로찜 제품별 현황</h3><div id="prodBox"></div>
+    <h3 style="margin-top:0">① 푸로찜제품별 현황</h3><div id="prodBox"></div>
     <h3>② 배송 필요 List (출고 대기)</h3><div id="shipWaitBox"></div>
     <h3>③ 본사납품 필요 List (입고 대기)</h3><div id="inboundWaitBox"></div>
     <h3>④ 최근 납품 List (최근 7일)</h3><div id="recentBox"></div>
@@ -179,7 +226,7 @@ td{padding:8px;border-bottom:1px solid #f1f4f8;vertical-align:middle}
   </section>
 
   <section id="historyPanel" class="panel hidden">
-    <h2>변경 이력</h2><div class="muted">추가·수정·납품일자 입력·보관·복원 내역입니다. 기록 당시 값 그대로 보관됩니다.</div>
+    <h2>변경 이력</h2><div class="muted" id="historySub">추가·수정·납품일자 입력·보관·복원 내역입니다. 기록 당시 값 그대로 보관됩니다.</div>
     <div class="toolbar">
       <input id="historyKeyword" placeholder="거래처명 / 속성 / 변경값 검색">
       <select id="historyDb"><option value="all">전체 DB</option><option value="거래처 DB">거래처 DB</option><option value="입출고 DB">입출고 DB</option></select>
@@ -187,57 +234,78 @@ td{padding:8px;border-bottom:1px solid #f1f4f8;vertical-align:middle}
       <button class="primary" id="historySearchBtn">조회</button>
     </div>
     <div id="historyTable"></div>
-    <div class="actions"><a id="auditSheetLink" href="#" target="_blank" rel="noopener" class="hidden"><button class="secondary">Google 시트 원본 열기</button></a></div>
+    <div class="actions"><a id="auditSheetLink" href="#" target="_blank" rel="noopener" class="hidden"><button class="secondary">Google 시트 '변경 이력 Log' 열기</button></a></div>
   </section>
-  <div class="foot">푸로찜 총판 관리용</div>
+  <div class="foot">푸로찜 총판 관리용 · v4.0</div>
 </main>
 
 <div class="modal-backdrop hidden" id="editModal"><div class="modal"><div class="modal-head"><div><h2 id="modalTitle">정보 수정</h2><div class="muted" id="modalSub"></div></div><button class="modal-close" id="modalClose">닫기 ✕</button></div><div id="modalNotice"></div><div id="editForm" class="form-grid"></div><div class="actions"><button class="secondary" id="modalCancel">취소</button><button class="primary" id="modalSave">저장 및 이력 기록</button></div></div></div>
 
-<div class="modal-backdrop hidden" id="manualModal"><div class="modal"><div class="modal-head"><div><h2>사용 매뉴얼 (v3.0)</h2><div class="muted">초등학생도 이해할 수 있는 사용법</div></div><button class="modal-close" id="manualClose">닫기 ✕</button></div>
+<div class="modal-backdrop hidden" id="manualModal"><div class="modal"><div class="modal-head"><div><h2>사용 매뉴얼 (v4.0)</h2><div class="muted">초등학생도 이해할 수 있는 사용법</div></div><button class="modal-close" id="manualClose">닫기 ✕</button></div>
 <div class="manual-body">
 <h4>1. 이 앱이 하는 일</h4>
 <li>노션에 있는 <b>거래처 DB / 입출고 DB / 제품 DB</b>를 휴대폰·PC에서 바로 보고 고치는 도구입니다.</li>
-<li>모든 변경은 <b>Google 시트 "변경 이력 Log"</b>에 언제·누가·무엇을·무엇에서 무엇으로 바꿨는지 자동 기록됩니다.</li>
+<li>모든 변경은 <b>GAS 코드가 붙어있는 그 구글시트 안의 '변경 이력 Log' 시트</b>에 언제·누가·무엇을·무엇에서 무엇으로 바꿨는지 자동 기록됩니다. (v4.0부터 시트가 하나로 합쳐졌습니다)</li>
 
-<h4>2. 입출고 현황 탭</h4>
-<li><b>① 제품별 현황</b>: 제품마다 창고 재고량 · 납품예정 반영 재고량 · 그리고 <b>"마지막 입고일 : 26-11-02 (16일 경과)"</b> 처럼 한 줄로 표시됩니다. (이전에는 두 줄이었습니다)</li>
-<li><b>② 배송 필요 List (출고 대기)</b>: 입출고 값이 <b>"출고"</b> 이면서 <b>배송필요</b> 값이 비어있지 않은 건만 나옵니다. 컬럼은 No. / 거래처 / 납품형태 / 납품요청일 / 납품일자 / 주소 / 명세표발행 / 발송대기 입니다.</li>
-<li><b>③ 본사납품 필요 List (입고 대기)</b>: 입출고 값이 <b>"입고"</b> 이면서 <b>배송필요</b> 값이 비어있지 않은 건만 나옵니다. 컬럼은 No. / 거래처 / 납품형태 / 납품요청일 / 납품일자 / 발주서발송 / 발주서 번호 입니다.</li>
-<li><b>④ 최근 납품 List (최근 7일)</b>: 컬럼은 No. / <b>입출고</b> / 거래처 / 납품일자 / <b>입금일자</b> / 상태 / 박스히어로 / 택배비 / 명세표 발송 입니다. (입출고·입금일자 컬럼이 새로 추가되었습니다)</li>
-<li><b>납품일자 입력 방법</b>: 리스트의 납품일자 칸을 누르면 휴대폰·PC 달력이 뜹니다. 날짜를 고르면 <b>곧바로 노션 "납품일자"에 저장</b>되고(<u>저장 버튼 없음</u>) 변경 이력에도 자동 기록됩니다. 저장 중에는 칸 테두리가 주황색, 성공하면 초록색이 됩니다. 실패하면 원래 값으로 되돌아가고 경고창이 뜹니다.</li>
+<h4>2. 맨 위 버튼 3개</h4>
+<li><b>연결됨 / 연결 끊김</b> : 노션과 실제로 통신해 본 결과입니다. <b>연결됨</b>이면 정상입니다.</li>
+<li><b>⟳ 새로고침</b> : 지금 보고 있는 탭의 숫자를 <b>서버에서 새로 받아</b> 다시 그립니다. (기다리는 캐시를 건너뜁니다) 휴대폰에서도 이 버튼 줄은 절대 두 줄로 넘어가지 않습니다.</li>
+<li><b>매뉴얼</b> : 지금 읽고 있는 이 설명서입니다.</li>
+
+<h4>3. 입출고 현황 탭</h4>
+<li><b>① 푸로찜제품별 현황</b> : 예전에는 제품마다 카드 1장씩 3장이었는데, v4.0부터 <b>표 한 장</b>으로 합쳤습니다. 가로줄은 항목(현재 재고량·예정 재고량·마지막 입고), 세로칸은 제품(12 KG·15 KG·20 KG)입니다.</li>
+<div class="box">
+<b>표 읽는 법</b><br>
+· <b>현재 재고량</b> = 노션 "실제재고(창고)" 값 → <span style="color:#1b46b8;font-weight:800">파란 음영</span><br>
+· <b>예정 재고량</b> = 노션 "재고량" 값(납품 예정까지 반영) → <span style="color:#0c6844;font-weight:800">초록 음영</span><br>
+· <b>마지막 입고</b> = <code>26-11-16 (2일)</code> 처럼 <b>한 줄</b>로 표시. 괄호 안 숫자는 오늘까지 지난 날 수이고, 30일이 넘으면 주황색으로 바뀝니다.
+</div>
+<li><b>② 배송 필요 List (출고 대기)</b> : 입출고 값이 <b>"출고"</b> 이면서 <b>배송필요</b> 값이 비어있지 않은 건만 나옵니다. 컬럼은 No. / 거래처 / 납품형태 / 납품요청일 / 납품일자 / 주소 / 명세표발행 / 발송대기 입니다.</li>
+<li><b>③ 본사납품 필요 List (입고 대기)</b> : 입출고 값이 <b>"입고"</b> 이면서 <b>배송필요</b> 값이 비어있지 않은 건만 나옵니다. 컬럼은 No. / 거래처 / 납품형태 / 납품요청일 / 납품일자 / 발주서발송 / 발주서 번호 입니다.</li>
+<li><b>④ 최근 납품 List (최근 7일)</b> : 컬럼은 No. / 입출고 / 거래처 / 납품일자 / 입금일자 / 상태 / 박스히어로 / 택배비 / 명세표 발송 입니다.</li>
+<li><b>납품일자 입력 방법</b> : 리스트의 납품일자 칸을 누르면 달력이 뜹니다. 날짜를 고르면 <b>곧바로 노션 "납품일자"에 저장</b>되고(<u>저장 버튼 없음</u>) 변경 이력에도 자동 기록됩니다. 저장 중에는 테두리가 주황색, 성공하면 초록색이 됩니다. 실패하면 원래 값으로 되돌아가고 경고창이 뜹니다.</li>
 <li>각 행의 <b>수정</b> 버튼을 누르면 그 페이지의 모든 속성을 고칠 수 있습니다.</li>
 
-<h4>3. 총판 통계 탭</h4>
-<li>모든 통계는 <b>납품일자가 있는 페이지만</b>, 그 납품일자 날짜 기준으로 계산합니다. (예전처럼 "납품일자 없으면 주문일자"로 섞지 않습니다)</li>
-<li><b>총 미수금</b> = 노션 "상태" 값이 <b>미수확인</b>인 페이지들의 <b>판매금 합계</b>입니다. (예전의 "판매금 − 입금액" 뺄셈 방식은 폐기했습니다)</li>
-<li><b>올해 평균 Profit</b> = 올해 납품일자 기준 Profit 합계 ÷ 올해 납품일자가 있는 페이지 수. <b>작년 평균 Profit</b>도 같은 방식으로 작년 것만 계산합니다.</li>
-<li><b>올해 평균 출고수량</b> = 올해 출고량 합계 ÷ 당월 숫자(예: 11월이면 ÷11). <b>평균 입고수량</b>도 동일합니다.</li>
-<li>월별 카드(판매수량·입고수량·Profit·판매금·입고액)는 <b>"26년 1월~12월"</b>처럼 올해 연도가 자동으로 붙습니다.</li>
-<li>아래 <b>기간 검색</b>은 납품일자 기준으로 그 기간의 합계·미수금·평균 Profit을 보여줍니다.</li>
+<h4>4. 총판 통계 탭</h4>
+<li>모든 통계는 <b>납품일자가 있는 페이지만</b>, 그 납품일자 날짜 기준으로 계산합니다.</li>
+<li><b>총 미수금</b> = 노션 "상태" 값에 <b>미수</b>가 들어간 페이지들의 <b>판매금 합계</b>입니다.</li>
+<li><b>올해 평균 Profit</b> = (올해 <b>출고</b> 페이지의 Profit 합계) ÷ (올해 <b>출고</b> 페이지 수). <b>입고 페이지는 분자·분모에서 모두 빠집니다.</b> (입고는 Profit이 0이라 평균을 끌어내리기 때문입니다) <b>작년 평균 Profit</b>도 같은 방식입니다.</li>
+<li><b>모든 평균값은 소수점 이하를 버립니다.</b> (예: 12,345.9원 → 12,345원)</li>
+<li><b>올해 판매금 합계 · 올해 총 출고수량 · 올해 총 입고수량</b> 세 개가 나란히 있습니다. 출고·입고 수량은 그 해 <b>출고량 합계 / 입고량 합계</b>입니다.</li>
+<li><b>당월 택배비</b>는 이번 달, <b>전월 택배비</b>는 지난 달(이번 달이 11월이면 10월)의 납품일자 기준 택배비 합계입니다. (v3.0에서 전월이 0원으로 나오던 오류를 고쳤습니다)</li>
+<li><b>월별 카드 3개</b> : ① 판매수량 + 판매금, ② 입고수량 + 입고액, ③ Profit. 한 칸 안에 위쪽 파란 음영이 <b>수량</b>, 아래쪽 회색 음영이 <b>금액</b>이고, 12개월 모두 같은 모양이라 달끼리 바로 비교됩니다.</li>
+<li>아래 <b>기간 검색</b>은 납품일자 기준으로 그 기간의 합계·미수금·평균 Profit(출고 건수로 나눔)을 보여줍니다.</li>
 
-<h4>4. 거래처 관리 / 거래처 추가</h4>
-<li>목록에서 <b>수정</b>을 누르고 값을 바꾼 뒤 <b>저장 및 이력 기록</b> → 예/아니오 확인 → "예"를 눌러야 저장됩니다.</li>
+<h4>5. 거래처 관리 / 거래처 추가</h4>
+<li>목록에서 <b>수정</b>을 누르고 값을 바꾼 뒤 <b>저장 및 이력 기록</b> → 확인 팝업에서 "예"를 눌러야 저장됩니다.</li>
 <li>주소 입력란의 <b>다음 주소 검색</b>으로 도로명·지번주소를 한 번에 넣습니다.</li>
+<li><b>휴면 거래처 재사용</b>은 총 출고량 0 + 연결된 입출고 0건일 때만 됩니다. 서버가 저장 직전에 한 번 더 검사합니다.</li>
 
-<h4>5. 변경 이력 탭</h4>
-<li>모든 기록을 검색할 수 있고, 보관(삭제)한 페이지는 <b>복원</b> 버튼으로 되살립니다.</li>
-<li>하단 <b>Google 시트 원본 열기</b>로 전체 Log를 볼 수 있습니다.</li>
+<h4>6. 변경 이력 탭</h4>
+<li>검색·필터로 기록을 찾을 수 있고, 보관(삭제)한 페이지는 <b>복원</b> 버튼으로 되살립니다.</li>
+<li>기록은 <b>이 앱의 GAS가 붙어있는 구글시트 안 '변경 이력 Log' 시트</b>에 쌓입니다. 시스템 동작 로그는 같은 파일의 <b>'웹앱' 시트</b>에 쌓입니다.</li>
+<li>하단 <b>Google 시트 '변경 이력 Log' 열기</b> 버튼을 누르면 그 시트가 새 창에서 열립니다.</li>
+<li>예전의 별도 파일("푸로찜 노션 관리 변경 이력")은 더 이상 쓰지 않습니다. 기존 기록을 옮기고 싶으면 Apps Script 편집기에서 <code>migrateLegacyAuditLog()</code>를 <b>한 번만</b> 실행하세요. (중복은 자동으로 걸러냅니다)</li>
 
-<h4>6. 이번 버전에서 달라진 점 (v2.0 → v3.0)</h4>
-<li>상단의 "Notion 독립 관리 시스템 v2.0 · 변경 이력 자동 누적" 문구와, 입출고 현황 상단의 긴 설명 문구를 <b>삭제</b>해 화면을 넓게 썼습니다.</li>
-<li>상단 상태 표시는 실제 연결 점검 결과로 <b>"연결됨"</b> 또는 <b>"연결 끊김"</b> 으로만 표시됩니다. 매뉴얼 버튼의 아이콘을 없애 휴대폰에서도 한 줄에 들어갑니다.</li>
-<li>하단 탭 5개가 휴대폰에서 <b>한 줄에 3개</b>씩(2줄) 배치됩니다.</li>
+<h4>7. v4.0에서 달라진 점</h4>
+<li>제품별 현황 3장 카드 → <b>표 1장</b> (재고 숫자 음영 강조, 마지막 입고 한 줄).</li>
+<li>평균 Profit 계산에서 <b>입고 페이지 제외</b> + <b>소수점 버림</b>.</li>
+<li><b>전월 택배비 0원</b> 오류 수정.</li>
+<li>월별 5개 버튼 → <b>3개 카드</b> (수량 + 금액 동시 표시).</li>
+<li>통계 카드에 <b>색상</b>을 넣어 숫자가 눈에 띄게.</li>
+<li>상단에 <b>새로고침</b> 버튼 추가 (휴대폰에서도 한 줄 유지).</li>
+<li>변경 이력 시트를 <b>이 스프레드시트 안으로 통합</b>.</li>
 
-<h4>7. 주의</h4>
+<h4>8. 주의</h4>
 <li>주소를 아는 사람은 누구나 열 수 있는 앱입니다. 필요한 사람에게만 공유하세요.</li>
 <li>수식·롤업(자동 계산) 값은 노션에서 계산되므로 이 앱에서는 바꿀 수 없습니다.</li>
+<li>통계는 서버 캐시를 60~120초 사용합니다. 방금 고친 값이 안 보이면 <b>⟳ 새로고침</b>을 누르세요.</li>
 </div></div></div>
 
 <div id="toast" style="position:fixed;bottom:18px;left:50%;transform:translateX(-50%);z-index:120;max-width:92vw;background:#172033;color:#fff;padding:12px 16px;border-radius:12px;box-shadow:var(--shadow);display:none;font-size:13px"></div>
 
 <script>
-const GAS_URL='https://script.google.com/macros/s/AKfycbw86Ya9kIunUZY0QS3o405x-gcgx-KCGiPnnGN-YlIDW0XR3OY6e90eJYktdOhluP4Y/exec';
+const GAS_URL='https://script.google.com/macros/s/AKfycbyeqVZDT1ug2awUPZ2OVb6-YTd9pf15eLi0MoftFK1rmjK3GCvEQw0zoHMZEdLUSpjsZQ/exec';
 let INIT=null,STATS=null,DASH=null;
 let currentTab='dashboard',currentEdit=null;
 let listState={clients:{cursor:null,search:''}};
@@ -257,7 +325,9 @@ async function api(action,payload){
 }
 function setBusy(el,busy){if(!el)return;el.disabled=busy;if(busy){el.dataset.old=el.textContent;el.innerHTML='<span class="spinner"></span> 처리 중';}else el.textContent=el.dataset.old||el.textContent;}
 function check_(v){return v?'<span class="pill ok">✔</span>':'<span class="pill no">✖</span>';}
+function num_(v){if(v===''||v==null)return null;if(typeof v==='number')return v;const n=Number(String(v).replace(/[,\s원₩]/g,''));return isFinite(n)?n:null;}
 function fmtN_(v){if(v===''||v==null)return '—';if(typeof v==='number')return v.toLocaleString('ko-KR');return String(v);}
+function fmtK_(v){const n=num_(v);if(n===null)return '—';return Math.round(n).toLocaleString('ko-KR');}
 function ioPill_(kind,title){if(kind==='out')return '<span class="pill io out">출고</span>';if(kind==='in')return '<span class="pill io">입고</span>';return '<span class="pill io no">'+esc(title||'—')+'</span>';}
 function yy_(y){return String(y).slice(2);}
 function switchTab(tab){
@@ -280,24 +350,52 @@ async function boot(){
     toast('Notion 연결에 실패했습니다: '+e.message,7000);
   }
 }
-/* ── 요청 1: 제품별 현황 (마지막 입고일 + 경과 한 줄) ── */
+/* ══════════════════════════════════════════════════════════
+   ① 제품별 현황 — 3장 카드 → 표 1장 (모바일 폭 안에서 3열 유지)
+   표 구조: 가로줄=항목 / 세로칸=제품
+   ══════════════════════════════════════════════════════════ */
+function shortProductName_(name){
+  const s=String(name||'').trim();
+  if(!s)return '(제품 없음)';
+  const t=s.replace(/푸로찜/g,'').replace(/\s+/g,' ').trim();
+  return t||s;
+}
+function ymdShort_(d){
+  const s=String(d||'').slice(0,10);
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(s))return s||'—';
+  return s.slice(2);            /* 2026-11-16 → 26-11-16 */
+}
 function renderProducts(rows){
   const box=$('prodBox');
-  if(!rows||!rows.length){box.innerHTML='<div class="empty">제품 정보가 없습니다.</div>';return;}
-  box.innerHTML='<div class="prod-grid">'+rows.map(function(p){
-    let elapsed;
-    if(p.lastInbound){
-      const d=Number(p.days);
-      elapsed='<span class="'+(d>=30?'warn':'')+'">'+d.toLocaleString('ko-KR')+'일 경과</span>';
-    }else{
-      elapsed='<span class="warn">입고 기록 없음</span>';
+  rows=rows||[];
+  if(!rows.length){box.innerHTML='<div class="pt-wrap"><div class="pt-empty">제품 정보가 없습니다.</div></div>';return;}
+  let h='<div class="pt-wrap"><table class="pt"><thead><tr><th class="pt-k">항목</th>';
+  rows.forEach(function(p){
+    h+='<th title="'+esc(p.name||'')+'">'+esc(shortProductName_(p.name))+'</th>';
+  });
+  h+='</tr></thead><tbody>';
+  /* 1줄: 현재 재고량 (파란 음영) */
+  h+='<tr><th>현재 재고량</th>';
+  rows.forEach(function(p){h+='<td class="v blue">'+esc(fmtK_(p.stock))+'</td>';});
+  h+='</tr>';
+  /* 2줄: 예정 재고량 (초록 음영) */
+  h+='<tr><th>예정 재고량</th>';
+  rows.forEach(function(p){h+='<td class="v mint">'+esc(fmtK_(p.stockPlan))+'</td>';});
+  h+='</tr>';
+  /* 3줄: 마지막 입고 — "26-11-16 (2일)" 한 줄 */
+  h+='<tr><th>마지막 입고</th>';
+  rows.forEach(function(p){
+    if(!p.lastInbound){h+='<td class="d warn"><span class="ago">기록 없음</span></td>';return;}
+    const days=(p.days===null||p.days===undefined)?null:Number(p.days);
+    let ago='';
+    if(days!==null&&isFinite(days)){
+      const n=days<0?0:days;
+      ago=' <span class="ago">('+n.toLocaleString('ko-KR')+'일)</span>';
     }
-    return '<div class="prod-card"><div class="name">'+esc(p.name||'(제품 없음)')+'</div>'+
-      '<div class="row"><span>창고 재고량</span><b>'+esc(fmtN_(p.stock))+'</b></div>'+
-      '<div class="row"><span>납품예정 반영 재고량</span><b>'+esc(fmtN_(p.stockPlan))+'</b></div>'+
-      '<div class="row"><span>마지막 입고일</span><b>'+(p.lastInbound?esc(p.lastInbound)+' ('+elapsed+')':'<span class="warn">기록 없음</span>')+'</b></div>'+
-      '</div>';
-  }).join('')+'</div>';
+    h+='<td class="d'+(days!==null&&days>=30?' warn':'')+'">'+esc(ymdShort_(p.lastInbound))+ago+'</td>';
+  });
+  h+='</tr></tbody></table></div>';
+  box.innerHTML=h;
 }
 /* ── 납품일자 캘린더 → 노션 즉시 반영 ── */
 function bindDateInputs(target){
@@ -326,7 +424,7 @@ function bindDateInputs(target){
 function dateInput_(r){
   return '<input type="date" class="date-cell" data-page-id="'+esc(r.id)+'" data-prev="'+esc(r.date||'')+'" value="'+esc(r.date||'')+'">';
 }
-/* ── 요청 2: ② 배송 필요 List (출고 대기) ── */
+/* ── ② 배송 필요 List (출고 대기) ── */
 function renderShipWait(rows){
   const t=$('shipWaitBox');
   rows=rows||[];
@@ -340,7 +438,7 @@ function renderShipWait(rows){
     }).join('')+'</tbody></table></div>';
   bindDateInputs(t);
 }
-/* ── 요청 3: ③ 본사납품 필요 List (입고 대기) ── */
+/* ── ③ 본사납품 필요 List (입고 대기) ── */
 function renderInboundWait(rows){
   const t=$('inboundWaitBox');
   rows=rows||[];
@@ -354,7 +452,7 @@ function renderInboundWait(rows){
     }).join('')+'</tbody></table></div>';
   bindDateInputs(t);
 }
-/* ── 요청 4: ④ 최근 납품 List (입출고 + 입금일자 추가) ── */
+/* ── ④ 최근 납품 List ── */
 function renderRecent(rows){
   const t=$('recentBox');
   rows=rows||[];
@@ -368,61 +466,69 @@ function renderRecent(rows){
     }).join('')+'</tbody></table></div>';
   t.querySelectorAll('[data-edit2]').forEach(function(b){b.addEventListener('click',function(){openEdit('inouts',b.dataset.edit2);});});
 }
-async function loadDashboard(){
+async function loadDashboard(force){
   const boxes=['prodBox','shipWaitBox','inboundWaitBox','recentBox'];
   boxes.forEach(function(b){$(b).innerHTML='<div class="empty"><span class="spinner"></span> 노션 조회 중</div>';});
   try{
-    DASH=await api('getDashboard',{});
+    DASH=await api('getDashboard',force?{force:true}:{});
     renderProducts(DASH.products);renderShipWait(DASH.shipWait);renderInboundWait(DASH.inboundWait);renderRecent(DASH.recent);
   }catch(e){boxes.forEach(function(b){$(b).innerHTML='<div class="notice error">'+esc(e.message)+'</div>';});}
 }
-/* ── 요청 5: 총판 통계 ── */
+/* ══════════════════════════════════════════════════════════
+   총판 통계 — 컬러 카드 + 월별 3카드(수량+금액)
+   ══════════════════════════════════════════════════════════ */
 function statCard_(label,val,cls,sub){
-  return '<div class="stat-card '+(cls||'')+'"><div class="stat-label">'+esc(label)+'</div><div class="stat-value">'+val+(sub?'<div class="stat-sub">'+esc(sub)+'</div>':'')+'</div></div>';
+  return '<div class="stat-card '+(cls||'c-slate')+'"><div class="stat-label">'+esc(label)+'</div><div class="stat-value">'+val+(sub?'<div class="stat-sub">'+esc(sub)+'</div>':'')+'</div></div>';
 }
-async function loadStats(){
+function monthCards_(title,arrA,unitA,arrB,unitB,cls){
+  let h='<h3>'+esc(title)+'</h3><div class="mo-grid">';
+  for(let i=0;i<12;i++){
+    const a=fmtK_(arrA?arrA[i]:0)+(unitA||'');
+    const b=fmtK_(arrB?arrB[i]:0)+(unitB||'');
+    const second=arrB?'<div class="mo-a">'+esc(b)+'</div>':'';
+    h+='<div class="mo-cell '+(cls||'')+'"><div class="mo-m">'+(i+1)+'월</div>'+
+       '<div class="mo-q">'+esc(a)+'</div>'+second+'</div>';
+  }
+  return h+'</div>';
+}
+async function loadStats(force){
   const box=$('statsBody');box.innerHTML='<div class="empty"><span class="spinner"></span> 통계 집계 중</div>';
-  try{STATS=await api('getStats',{});renderStats();}catch(e){box.innerHTML='<div class="notice error">'+esc(e.message)+'</div>';}
+  try{STATS=await api('getStats',force?{force:true}:{});renderStats();}catch(e){box.innerHTML='<div class="notice error">'+esc(e.message)+'</div>';}
 }
 function renderStats(){
-  const s=STATS,m=s.monthly,y=s.basis.year,ly=y-1,yy=yy_(y),lyy=yy_(ly);
-  $('statsBasis').textContent='집계 기준일: 납품일자';
+  const s=STATS,m=s.monthly,y=s.basis.year,ly=s.basis.lastYear||y-1,yy=yy_(y),lyy=yy_(ly);
+  $('statsBasis').textContent='집계 기준일: 납품일자 · 모든 평균값은 소수점 버림';
   let h='';
   h+='<h3>핵심 요약</h3><div class="stat-grid">'+
-     statCard_('총 미수금',fmtN_(s.summary.unpaid)+'원','warn','상태=미수확인 '+fmtN_(s.summary.unpaidCount)+'건')+
-     statCard_('올해 평균 Profit',fmtN_(s.summary.avgProfitThis),'',yy+'년 '+fmtN_(s.summary.thisYearCount)+'건')+
-     statCard_('작년 평균 Profit',fmtN_(s.summary.avgProfitLast),'',lyy+'년 '+fmtN_(s.summary.lastYearCount)+'건')+
+     statCard_('총 미수금',fmtK_(s.summary.unpaid)+'원','c-rose','상태=미수 '+fmtK_(s.summary.unpaidCount)+'건')+
+     statCard_('올해 평균 Profit',fmtK_(s.summary.avgProfitThis)+'원','c-blue','출고 '+fmtK_(s.summary.profitOutCntThis)+'건 기준')+
+     statCard_('작년 평균 Profit',fmtK_(s.summary.avgProfitLast)+'원','c-slate','출고 '+fmtK_(s.summary.profitOutCntLast)+'건 기준')+
      '</div>';
   h+='<div class="stat-grid">'+
-     statCard_('올해 평균 출고수량',fmtN_(s.summary.avgOutThis),'','÷'+s.basis.monthNo+'개월')+
-     statCard_('올해 평균 입고수량',fmtN_(s.summary.avgInThis),'','÷'+s.basis.monthNo+'개월')+
-     statCard_('올해 Profit 합계',fmtN_(s.summary.profitThis)+'원')+
-     statCard_('올해 판매금 합계',fmtN_(s.summary.salesThis)+'원')+
+     statCard_('올해 판매금 합계',fmtK_(s.summary.salesThis)+'원','c-violet',yy+'년')+
+     statCard_('올해 총 출고수량',fmtK_(s.summary.outQtyThis)+'개','c-blue','출고 '+fmtK_(s.summary.outCntThis)+'건')+
+     statCard_('올해 총 입고수량',fmtK_(s.summary.inQtyThis)+'개','c-teal','입고 '+fmtK_(s.summary.inCntThis)+'건')+
+     '</div>';
+  h+='<div class="stat-grid">'+
+     statCard_('올해 Profit 합계',fmtK_(s.summary.profitThis)+'원','c-green',yy+'년')+
+     statCard_('올해 평균 출고수량',fmtK_(s.summary.avgOutThis)+'개','c-slate','÷'+s.basis.monthNo+'개월')+
+     statCard_('올해 평균 입고수량',fmtK_(s.summary.avgInThis)+'개','c-slate','÷'+s.basis.monthNo+'개월')+
      '</div>';
   h+='<h3>택배비</h3><div class="stat-grid">'+
-     statCard_('당월 택배비',fmtN_(s.summary.courierMonth)+'원')+
-     statCard_('전월 택배비',fmtN_(s.summary.courierPrev)+'원')+
-     statCard_('올해 총 택배비',fmtN_(s.summary.courierYear)+'원')+'</div>';
+     statCard_('당월 택배비',fmtK_(s.summary.courierMonth)+'원','c-amber',s.basis.thisMonthKey||'')+
+     statCard_('전월 택배비',fmtK_(s.summary.courierPrev)+'원','c-amber',s.basis.prevMonthKey||'')+
+     statCard_('올해 총 택배비',fmtK_(s.summary.courierYear)+'원','c-slate',yy+'년')+'</div>';
   h+='<h3>작년('+ly+') 실적</h3><div class="stat-grid">'+
-     statCard_('작년 총 입고량',fmtN_(s.summary.inQtyLast))+
-     statCard_('작년 총 입금액',fmtN_(s.summary.paidLast)+'원')+
-     statCard_('작년 총 출고량',fmtN_(s.summary.outQtyLast))+
-     statCard_('작년 총 판매금',fmtN_(s.summary.salesLast)+'원')+
-     statCard_('작년 총 입고액',fmtN_(s.summary.inAmtLast)+'원')+
-     statCard_('작년 Profit 합계',fmtN_(s.summary.profitLast)+'원')+
+     statCard_('작년 총 입고량',fmtK_(s.summary.inQtyLast)+'개','c-teal')+
+     statCard_('작년 총 입금액',fmtK_(s.summary.paidLast)+'원','c-green')+
+     statCard_('작년 총 출고량',fmtK_(s.summary.outQtyLast)+'개','c-blue')+
+     statCard_('작년 총 판매금',fmtK_(s.summary.salesLast)+'원','c-violet')+
+     statCard_('작년 총 입고액',fmtK_(s.summary.inAmtLast)+'원','c-amber')+
+     statCard_('작년 Profit 합계',fmtK_(s.summary.profitLast)+'원','c-rose')+
      '</div>';
-  const row12=function(title,arr,unit){
-    let a='<h3>'+title+'</h3><div class="stat-grid">';
-    for(let i=0;i<6;i++)a+=statCard_((i+1)+'월',fmtN_(arr[i])+(unit||''));
-    a+='</div><div class="stat-grid">';
-    for(let i=6;i<12;i++)a+=statCard_((i+1)+'월',fmtN_(arr[i])+(unit||''));
-    return a+'</div>';
-  };
-  h+=row12('월별 총 판매수량 ('+yy+'년 1월~12월)',m.salesQty,'개');
-  h+=row12('월별 총 입고수량 ('+yy+'년 1월~12월)',m.inQty,'개');
-  h+=row12('월별 Profit ('+yy+'년 1월~12월)',m.profit,'원');
-  h+=row12('월별 총 판매금 ('+yy+'년 1월~12월)',m.sales,'원');
-  h+=row12('월별 총 입고액 ('+yy+'년 1월~12월)',m.inAmt,'원');
+  h+=monthCards_('월별 총 판매수량 및 판매금 ('+yy+'년 1월~12월)',m.salesQty,'개',m.sales,'원','');
+  h+=monthCards_('월별 총 입고수량 및 입고액 ('+yy+'년 1월~12월)',m.inQty,'개',m.inAmt,'원','green');
+  h+=monthCards_('월별 Profit ('+yy+'년 1월~12월)',m.profit,'원',null,'','violet');
   $('statsBody').innerHTML=h;
 }
 async function searchStats(){
@@ -432,11 +538,11 @@ async function searchStats(){
   box.innerHTML='<div class="empty"><span class="spinner"></span> 집계 중</div>';
   try{
     const r=await api('searchStats',{start:start,end:end});
-    box.innerHTML='<div class="muted" style="margin:8px 0">납품일자 '+esc(r.start)+' ~ '+esc(r.end)+' · '+fmtN_(r.count)+'건</div><div class="stat-grid">'+
-      statCard_('판매수량',fmtN_(r.salesQty)+'개')+statCard_('판매금',fmtN_(r.sales)+'원')+
-      statCard_('입고수량',fmtN_(r.inQty)+'개')+statCard_('입고액',fmtN_(r.inAmt)+'원')+
-      statCard_('Profit',fmtN_(r.profit)+'원')+statCard_('택배비',fmtN_(r.courier)+'원')+
-      statCard_('미수금',fmtN_(r.unpaid)+'원','warn')+statCard_('평균 Profit',fmtN_(r.avgProfit))+'</div>';
+    box.innerHTML='<div class="muted" style="margin:8px 0">납품일자 '+esc(r.start)+' ~ '+esc(r.end)+' · '+fmtK_(r.count)+'건 (출고 '+fmtK_(r.outCount)+'건)</div><div class="stat-grid">'+
+      statCard_('판매수량',fmtK_(r.salesQty)+'개','c-blue')+statCard_('판매금',fmtK_(r.sales)+'원','c-violet')+
+      statCard_('입고수량',fmtK_(r.inQty)+'개','c-teal')+statCard_('입고액',fmtK_(r.inAmt)+'원','c-amber')+
+      statCard_('Profit',fmtK_(r.profit)+'원','c-green')+statCard_('택배비',fmtK_(r.courier)+'원','c-slate')+
+      statCard_('미수금',fmtK_(r.unpaid)+'원','c-rose')+statCard_('평균 Profit',fmtK_(r.avgProfit)+'원','c-slate','출고 건수 기준')+'</div>';
   }catch(e){box.innerHTML='<div class="notice error">'+esc(e.message)+'</div>';}
 }
 /* ── 거래처 관리 ── */
@@ -624,6 +730,7 @@ async function loadHistory(){
   try{
     const r=await api('getHistory',{db:$('historyDb').value,keyword:$('historyKeyword').value.trim(),actionFilter:$('historyAction').value});
     const link=$('auditSheetLink');link.href=r.spreadsheetUrl;link.classList.remove('hidden');
+    if(r.sheetName)$('historySub').textContent='추가·수정·납품일자 입력·보관·복원 내역입니다. 기록은 이 스프레드시트의 "'+r.sheetName+'" 시트에 저장됩니다.';
     if(!r.rows.length){target.innerHTML='<div class="empty">변경 이력이 없습니다.</div>';return;}
     target.innerHTML='<div class="muted" style="margin-bottom:8px">검색 결과 '+r.total.toLocaleString()+'건 · 최신순 최대 500건</div><div class="table-wrap"><table><thead><tr><th>기록일시</th><th>작업</th><th>DB / 페이지</th><th>속성</th><th>As is</th><th>To be</th><th>관리</th></tr></thead><tbody>'+
       r.rows.map(function(x){
@@ -641,10 +748,37 @@ async function loadHistory(){
     });
   }catch(e){target.innerHTML='<div class="notice error">'+esc(e.message)+'</div>';}
 }
+/* ══════ 새로고침 (페이지 리로드 아님 — 지금 탭만 다시 조회) ══════ */
+async function doRefresh(){
+  const btn=$('refreshBtn');
+  if(btn.disabled)return;
+  btn.disabled=true;btn.classList.add('spinning');
+  const label=$('connectionLabel');
+  try{
+    await api('health',{});
+    if(!INIT)INIT=await api('initial',{});
+    label.className='on';label.textContent='연결됨';
+    if(currentTab==='dashboard'){await loadDashboard(true);}
+    else if(currentTab==='stats'){
+      $('searchStatsBox').innerHTML='';
+      await loadStats(true);
+    }
+    else if(currentTab==='clients'){await loadList('clients',true);}
+    else if(currentTab==='history'){await loadHistory();}
+    else if(currentTab==='newclient'){$('dormantCandidates').innerHTML='';}
+    toast('최신 정보로 새로고침했습니다.');
+  }catch(e){
+    label.className='off';label.textContent='연결 끊김';
+    toast('새로고침 실패: '+e.message,6000);
+  }finally{
+    btn.disabled=false;btn.classList.remove('spinning');
+  }
+}
 /* ── 이벤트 ── */
 document.querySelectorAll('.tab').forEach(function(b){b.addEventListener('click',function(){switchTab(b.dataset.tab);});});
 $('manualBtn').addEventListener('click',function(){$('manualModal').classList.remove('hidden');});
 $('manualClose').addEventListener('click',function(){$('manualModal').classList.add('hidden');});
+$('refreshBtn').addEventListener('click',doRefresh);
 $('clientsSearchBtn').addEventListener('click',function(){loadList('clients',true);});
 $('clientsReload').addEventListener('click',function(){loadList('clients',true);});
 $('clientsSearch').addEventListener('keydown',function(e){if(e.key==='Enter')loadList('clients',true);});
@@ -658,6 +792,9 @@ $('searchStatsBtn').addEventListener('click',searchStats);
 $('modalClose').addEventListener('click',function(){$('editModal').classList.add('hidden');});
 $('modalCancel').addEventListener('click',function(){$('editModal').classList.add('hidden');});
 $('modalSave').addEventListener('click',saveModal);
+document.addEventListener('keydown',function(e){
+  if(e.key==='Escape'){$('editModal').classList.add('hidden');$('manualModal').classList.add('hidden');}
+});
 boot();
 </script>
 <script>

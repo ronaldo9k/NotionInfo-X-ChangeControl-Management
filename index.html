@@ -69,6 +69,9 @@ td{padding:8px;border-bottom:1px solid #f1f4f8;vertical-align:middle}
 .pill.io{background:#eef1f6;color:#334155;min-width:34px;text-align:center}
 .pill.io.out{background:#eaf0ff;color:#2457d6}
 .hidden{display:none!important}
+/* v10.0: 오늘 납품요청일 강조 + 삭제 버튼 */
+.today-td{background:#eef3ff;color:#1b46b8;font-weight:700}
+.danger-solid{background:var(--red);color:#fff}
 .spinner{display:inline-block;width:14px;height:14px;border:2px solid rgba(0,0,0,.15);border-top-color:var(--blue);border-radius:50%;animation:spin .8s linear infinite;vertical-align:-2px}
 @keyframes spin{to{transform:rotate(360deg)}}
 .modal-backdrop{position:fixed;inset:0;background:rgba(16,24,39,.45);z-index:100;display:flex;align-items:flex-start;justify-content:center;padding:5vh 14px;overflow:auto}
@@ -236,76 +239,63 @@ td{padding:8px;border-bottom:1px solid #f1f4f8;vertical-align:middle}
     <div id="historyTable"></div>
     <div class="actions"><a id="auditSheetLink" href="#" target="_blank" rel="noopener" class="hidden"><button class="secondary">Google 시트 '변경 이력 Log' 열기</button></a></div>
   </section>
-  <div class="foot">푸로찜 총판 관리용 · v4.0</div>
+  <div class="foot">푸로찜 총판 관리시스템 v10.0 최종</div>
 </main>
 
 <div class="modal-backdrop hidden" id="editModal"><div class="modal"><div class="modal-head"><div><h2 id="modalTitle">정보 수정</h2><div class="muted" id="modalSub"></div></div><button class="modal-close" id="modalClose">닫기 ✕</button></div><div id="modalNotice"></div><div id="editForm" class="form-grid"></div><div class="actions"><button class="secondary" id="modalCancel">취소</button><button class="primary" id="modalSave">저장 및 이력 기록</button></div></div></div>
 
-<div class="modal-backdrop hidden" id="manualModal"><div class="modal"><div class="modal-head"><div><h2>사용 매뉴얼 (v4.0)</h2><div class="muted">초등학생도 이해할 수 있는 사용법</div></div><button class="modal-close" id="manualClose">닫기 ✕</button></div>
+<div class="modal-backdrop hidden" id="deleteModal"><div class="modal" style="max-width:430px"><div class="modal-head"><div><h2>정보 삭제</h2><div class="muted" id="delSub"></div></div><button class="modal-close" id="delClose">닫기 ✕</button></div><div class="notice error" style="margin-top:10px"><b>정말 삭제할까요?</b><br>노션 "푸로찜 입출고 DB"의 해당 페이지가 휴지통으로 이동됩니다. 삭제 기록은 변경 이력에 자동 남습니다.</div><div class="field" style="margin-top:12px"><label>비밀번호</label><input type="password" id="delPw" autocomplete="off" placeholder="삭제 확인 비밀번호 입력"></div><div class="actions" style="display:flex;gap:8px;justify-content:center"><button class="secondary" id="delNo">No (취소)</button><button class="danger-solid" id="delYes">Yes (삭제)</button></div></div></div>
+
+<div class="modal-backdrop hidden" id="manualModal"><div class="modal"><div class="modal-head"><div><h2>사용 매뉴얼 (v10.0 최종)</h2><div class="muted">처음 보는 사람도 바로 따라 할 수 있는 사용법</div></div><button class="modal-close" id="manualClose">닫기 ✕</button></div>
 <div class="manual-body">
-<h4>1. 이 앱이 하는 일</h4>
-<li>노션에 있는 <b>거래처 DB / 입출고 DB / 제품 DB</b>를 휴대폰·PC에서 바로 보고 고치는 도구입니다.</li>
-<li>모든 변경은 <b>GAS 코드가 붙어있는 그 구글시트 안의 '변경 이력 Log' 시트</b>에 언제·누가·무엇을·무엇에서 무엇으로 바꿨는지 자동 기록됩니다. (v4.0부터 시트가 하나로 합쳐졌습니다)</li>
+<div class="box" style="background:#eaf0ff;border-color:#c7d6ff"><b>한 줄 요약</b> : 이 앱은 <b>노션에 있는 3개 DB(거래처·입출고·제품)를 휴대폰/PC에서 바로 보고 고치는 도구</b>입니다. 모든 변경은 자동으로 구글시트 "변경 이력 Log"에 기록됩니다.</div>
 
-<h4>2. 맨 위 버튼 3개</h4>
-<li><b>연결됨 / 연결 끊김</b> : 노션과 실제로 통신해 본 결과입니다. <b>연결됨</b>이면 정상입니다.</li>
-<li><b>⟳ 새로고침</b> : 지금 보고 있는 탭의 숫자를 <b>서버에서 새로 받아</b> 다시 그립니다. (기다리는 캐시를 건너뜁니다) 휴대폰에서도 이 버튼 줄은 절대 두 줄로 넘어가지 않습니다.</li>
-<li><b>매뉴얼</b> : 지금 읽고 있는 이 설명서입니다.</li>
+<h4>🏠 화면 위쪽 버튼</h4>
+<li><b>연결됨 / 연결 끊김</b> : 노션과 연결되었는지 알려주는 신호등. <b>연결됨</b>이면 정상이에요.</li>
+<li><b>⟳ 새로고침</b> : 지금 보고 있는 화면의 숫자를 노션에서 <b>새로 받아와</b> 다시 보여줍니다.</li>
+<li><b>매뉴얼</b> : 지금 보고 있는 이 설명서예요.</li>
 
-<h4>3. 입출고 현황 탭</h4>
-<li><b>① 푸로찜제품별 현황</b> : 예전에는 제품마다 카드 1장씩 3장이었는데, v4.0부터 <b>표 한 장</b>으로 합쳤습니다. 가로줄은 항목(현재 재고량·예정 재고량·마지막 입고), 세로칸은 제품(12 KG·15 KG·20 KG)입니다.</li>
-<div class="box">
-<b>표 읽는 법</b><br>
-· <b>현재 재고량</b> = 노션 "실제재고(창고)" 값 → <span style="color:#1b46b8;font-weight:800">파란 음영</span><br>
-· <b>예정 재고량</b> = 노션 "재고량" 값(납품 예정까지 반영) → <span style="color:#0c6844;font-weight:800">초록 음영</span><br>
-· <b>마지막 입고</b> = <code>26-11-16 (2일)</code> 처럼 <b>한 줄</b>로 표시. 괄호 안 숫자는 오늘까지 지난 날 수이고, 30일이 넘으면 주황색으로 바뀝니다.
-</div>
-<li><b>② 배송 필요 List (출고 대기)</b> : 입출고 값이 <b>"출고"</b> 이면서 <b>배송필요</b> 값이 비어있지 않은 건만 나옵니다. 컬럼은 No. / 거래처 / 납품형태 / 납품요청일 / 납품일자 / 주소 / 명세표발행 / 발송대기 입니다.</li>
-<li><b>③ 본사납품 필요 List (입고 대기)</b> : 입출고 값이 <b>"입고"</b> 이면서 <b>배송필요</b> 값이 비어있지 않은 건만 나옵니다. 컬럼은 No. / 거래처 / 납품형태 / 납품요청일 / 납품일자 / 발주서발송 / 발주서 번호 입니다.</li>
-<li><b>④ 최근 납품 List (최근 7일)</b> : 컬럼은 No. / 입출고 / 거래처 / 납품일자 / 입금일자 / 상태 / 박스히어로 / 택배비 / 명세표 발송 입니다.</li>
-<li><b>납품일자 입력 방법</b> : 리스트의 납품일자 칸을 누르면 달력이 뜹니다. 날짜를 고르면 <b>곧바로 노션 "납품일자"에 저장</b>되고(<u>저장 버튼 없음</u>) 변경 이력에도 자동 기록됩니다. 저장 중에는 테두리가 주황색, 성공하면 초록색이 됩니다. 실패하면 원래 값으로 되돌아가고 경고창이 뜹니다.</li>
-<li>각 행의 <b>수정</b> 버튼을 누르면 그 페이지의 모든 속성을 고칠 수 있습니다.</li>
+<h4>📋 입출고 현황 탭 (맨 처음 화면)</h4>
+<li><b>① 푸로찜제품별 현황</b> : 표 1장으로 제품(12/15/20 KG) 재고를 한눈에 봅니다.
+<div class="box">· <b>현재 재고량</b>(파란 음영) = 창고에 실제 있는 양<br>· <b>예정 재고량</b>(초록 음영) = 앞으로의 납품까지 반영한 양<br>· <b>마지막 입고</b> = 마지막으로 창고에 들어온 날. <code>26-11-16 (2일)</code>처럼 며칠 지났는지도 알려주고, 30일이 넘으면 주황색이 됩니다.</div></li>
+<li><b>② 배송 필요 List (출고 대기)</b> : 손님에게 보내야 하는 것들. <b>③ 본사납품 필요 List (입고 대기)</b> : 본사에서 받아야 하는 것들.
+<div class="box">· <b>날짜 옆 (월)(화)(수)…</b> : 납품요청일의 요일이 한 글자로 표시됩니다.
+· <b>오늘이 납품요청일인 행</b>은 <b>거래처와 납품형태가 파란 음영</b>으로 표시되어 한눈에 구분됩니다.
+· <b>납품일자 칸</b>을 눌러 달력에서 날짜를 고르면 <b>저장 버튼 없이 바로 노션에 저장</b>됩니다. (저장 중 주황 테두리 → 성공하면 초록 테두리)</div></li>
+<li><b>④ 최근 납품 List</b> : 최근 7일 동안의 납품 기록입니다.</li>
+<li><b>수정 / 삭제 버튼</b> : 각 행마다 있습니다.
+<div class="box">· <b>수정(파란 버튼)</b> : 그 행의 모든 정보를 고칠 수 있어요. 고친 뒤 "저장 및 이력 기록"을 누르면 됩니다.
+· <b>삭제(빨간 버튼)</b> : 그 행의 정보를 노션에서 지웁니다. <b>①비밀번호 입력 → ②"정말 삭제할까요?" Yes 선택</b>이라는 2단계 확인이 있어서 실수로 눌러도 안 지워집니다. 지운 페이지는 노션 휴지통에 남아 복구할 수 있고, 삭제 기록도 변경 이력에 남습니다.</div></li>
 
-<h4>4. 총판 통계 탭</h4>
-<li>모든 통계는 <b>납품일자가 있는 페이지만</b>, 그 납품일자 날짜 기준으로 계산합니다.</li>
-<li><b>총 미수금</b> = 노션 "상태" 값에 <b>미수</b>가 들어간 페이지들의 <b>판매금 합계</b>입니다.</li>
-<li><b>올해 평균 Profit</b> = (올해 <b>출고</b> 페이지의 Profit 합계) ÷ (올해 <b>출고</b> 페이지 수). <b>입고 페이지는 분자·분모에서 모두 빠집니다.</b> (입고는 Profit이 0이라 평균을 끌어내리기 때문입니다) <b>작년 평균 Profit</b>도 같은 방식입니다.</li>
-<li><b>모든 평균값은 소수점 이하를 버립니다.</b> (예: 12,345.9원 → 12,345원)</li>
-<li><b>올해 판매금 합계 · 올해 총 출고수량 · 올해 총 입고수량</b> 세 개가 나란히 있습니다. 출고·입고 수량은 그 해 <b>출고량 합계 / 입고량 합계</b>입니다.</li>
-<li><b>당월 택배비</b>는 이번 달, <b>전월 택배비</b>는 지난 달(이번 달이 11월이면 10월)의 납품일자 기준 택배비 합계입니다. (v3.0에서 전월이 0원으로 나오던 오류를 고쳤습니다)</li>
-<li><b>월별 카드 3개</b> : ① 판매수량 + 판매금, ② 입고수량 + 입고액, ③ Profit. 한 칸 안에 위쪽 파란 음영이 <b>수량</b>, 아래쪽 회색 음영이 <b>금액</b>이고, 12개월 모두 같은 모양이라 달끼리 바로 비교됩니다.</li>
-<li>아래 <b>기간 검색</b>은 납품일자 기준으로 그 기간의 합계·미수금·평균 Profit(출고 건수로 나눔)을 보여줍니다.</li>
+<h4>📊 총판 통계 탭</h4>
+<li>모든 통계는 <b>납품일자</b>가 있는 기록만, 그 날짜 기준으로 계산합니다.</li>
+<li><b>총 미수금</b> : 상태에 "미수"가 있는 건들의 판매금 합계.</li>
+<li><b>올해 평균 Profit</b> : 올해 <b>출고 Profit을 전부 더한 값 ÷ 지금까지 지난 달 수</b>. (예: 10월이면 ÷10) 소수점은 버립니다.</li>
+<li><b>올해 총 입금액</b> : 올해 받은 돈(Σ입고액)의 총합.</li>
+<li><b>작년 실적 3개 카드</b> : ① 입고량/입고액 ② 출고량/판매금 ③ Profit — 각각 <b>총합</b>과 <b>12으로 나눈 월 평균</b>이 같이 나옵니다.</li>
+<li><b>택배비 카드</b> : 당월·전월·올해 총 택배비.</li>
+<li><b>월별 카드 3줄</b> : 1월~12월을 판매·입고·Profit으로 각각 보여줍니다. 위 칸은 수량, 아래 칸은 금액이에요.</li>
+<li><b>기간 검색</b> : 시작일~종료일을 고르고 "조회"를 누르면 그 기간 동안의 실적 합계가 나옵니다.</li>
 
-<h4>5. 거래처 관리 / 거래처 추가</h4>
-<li>목록에서 <b>수정</b>을 누르고 값을 바꾼 뒤 <b>저장 및 이력 기록</b> → 확인 팝업에서 "예"를 눌러야 저장됩니다.</li>
-<li>주소 입력란의 <b>다음 주소 검색</b>으로 도로명·지번주소를 한 번에 넣습니다.</li>
-<li><b>휴면 거래처 재사용</b>은 총 출고량 0 + 연결된 입출고 0건일 때만 됩니다. 서버가 저장 직전에 한 번 더 검사합니다.</li>
+<h4>🏪 거래처 관리 / 거래처 추가 탭</h4>
+<li><b>거래처 관리</b> : 거래처 목록을 검색하고 <b>수정</b>(정보 변경)·<b>보관</b>(노션 휴지통 이동)을 할 수 있습니다.</li>
+<li>주소 칸의 <b>다음 주소 검색</b> 버튼으로 도로명·지번주소를 한 번에 넣을 수 있어요.</li>
+<li><b>거래처 추가</b> : 새 거래처를 만들거나, 오래 쓰지 않은 <b>휴면 거래처를 재사용</b>할 수 있습니다. (출고 기록이 0건인 거래처만, 저장할 때 서버가 다시 확인합니다)</li>
 
-<h4>6. 변경 이력 탭</h4>
-<li>검색·필터로 기록을 찾을 수 있고, 보관(삭제)한 페이지는 <b>복원</b> 버튼으로 되살립니다.</li>
-<li>기록은 <b>이 앱의 GAS가 붙어있는 구글시트 안 '변경 이력 Log' 시트</b>에 쌓입니다. 시스템 동작 로그는 같은 파일의 <b>'웹앱' 시트</b>에 쌓입니다.</li>
-<li>하단 <b>Google 시트 '변경 이력 Log' 열기</b> 버튼을 누르면 그 시트가 새 창에서 열립니다.</li>
-<li>예전의 별도 파일("푸로찜 노션 관리 변경 이력")은 더 이상 쓰지 않습니다. 기존 기록을 옮기고 싶으면 Apps Script 편집기에서 <code>migrateLegacyAuditLog()</code>를 <b>한 번만</b> 실행하세요. (중복은 자동으로 걸러냅니다)</li>
+<h4>🕘 변경 이력 탭</h4>
+<li>누가·언제·무엇을 바꿨는지 전부 기록됩니다. 검색과 필터로 찾을 수 있어요.</li>
+<li>보관(삭제)한 페이지는 <b>복원</b> 버튼으로 되살릴 수 있습니다.</li>
+<li>아래 버튼을 누르면 구글시트 "변경 이력 Log"가 새 창에서 열립니다.</li>
 
-<h4>7. v4.0에서 달라진 점</h4>
-<li>제품별 현황 3장 카드 → <b>표 1장</b> (재고 숫자 음영 강조, 마지막 입고 한 줄).</li>
-<li>평균 Profit 계산에서 <b>입고 페이지 제외</b> + <b>소수점 버림</b>.</li>
-<li><b>전월 택배비 0원</b> 오류 수정.</li>
-<li>월별 5개 버튼 → <b>3개 카드</b> (수량 + 금액 동시 표시).</li>
-<li>통계 카드에 <b>색상</b>을 넣어 숫자가 눈에 띄게.</li>
-<li>상단에 <b>새로고침</b> 버튼 추가 (휴대폰에서도 한 줄 유지).</li>
-<li>변경 이력 시트를 <b>이 스프레드시트 안으로 통합</b>.</li>
-
-<h4>8. 주의</h4>
-<li>주소를 아는 사람은 누구나 열 수 있는 앱입니다. 필요한 사람에게만 공유하세요.</li>
-<li>수식·롤업(자동 계산) 값은 노션에서 계산되므로 이 앱에서는 바꿀 수 없습니다.</li>
-<li>통계는 서버 캐시를 60~120초 사용합니다. 방금 고친 값이 안 보이면 <b>⟳ 새로고침</b>을 누르세요.</li>
+<h4>⚠️ 딱 두 가지만 기억하기</h4>
+<li>노션에서 <b>자동 계산되는 값(수식·롤업)</b>은 이 앱에서 바꿀 수 없습니다.</li>
+<li>방금 고친 값이 화면에 바로 안 보이면 <b>⟳ 새로고침</b>을 눌러주세요. (통계는 1~2분 캐시를 사용합니다)</li>
 </div></div></div>
 
 <div id="toast" style="position:fixed;bottom:18px;left:50%;transform:translateX(-50%);z-index:120;max-width:92vw;background:#172033;color:#fff;padding:12px 16px;border-radius:12px;box-shadow:var(--shadow);display:none;font-size:13px"></div>
 
 <script>
-const GAS_URL='https://script.google.com/macros/s/AKfycbyeqVZDT1ug2awUPZ2OVb6-YTd9pf15eLi0MoftFK1rmjK3GCvEQw0zoHMZEdLUSpjsZQ/exec';
+const GAS_URL='https://script.google.com/macros/s/AKfycbxbHYmw3BebjjZ6MWoTDXOPSWgf_RNZ714JRi6S-VskVL4WjF9hi4KcA1X0XEnAtHWCnA/exec';
 let INIT=null,STATS=null,DASH=null;
 let currentTab='dashboard',currentEdit=null;
 let listState={clients:{cursor:null,search:''}};
@@ -329,6 +319,28 @@ function num_(v){if(v===''||v==null)return null;if(typeof v==='number')return v;
 function fmtN_(v){if(v===''||v==null)return '—';if(typeof v==='number')return v.toLocaleString('ko-KR');return String(v);}
 function fmtK_(v){const n=num_(v);if(n===null)return '—';return Math.round(n).toLocaleString('ko-KR');}
 function ioPill_(kind,title){if(kind==='out')return '<span class="pill io out">출고</span>';if(kind==='in')return '<span class="pill io">입고</span>';return '<span class="pill io no">'+esc(title||'—')+'</span>';}
+/* v10.0: 오늘 날짜(Asia/Seoul 기준) */
+function todayKST_(){return new Date(Date.now()+9*3600*1000).toISOString().slice(0,10);}
+function isToday_(d){return !!d&&d===todayKST_();}
+/* v10.0: 요일을 한글 한 글자로 통일 — "10/26(월)"·"10/26(Mon)" → "10/26(월)" (연동 리스크 없음, 표시 전용) */
+function krDow_(label){
+  const s=String(label||'');
+  if(!s)return s;
+  const m=s.match(/^(\d{2}\/\d{2})\s*\(([^)]+)\)$/);
+  if(!m)return s;
+  const kr=['일','월','화','수','목','금','토'];
+  const en={sun:0,mon:1,tue:2,wed:3,thu:4,fri:5,sat:6};
+  const w=m[2].toLowerCase();
+  if(w in en)return m[1]+'('+kr[en[w]]+')';
+  if(kr.indexOf(m[2])>=0)return m[1]+'('+m[2]+')';
+  return m[1]+'('+m[2].charAt(0)+')';
+}
+/* v10.0: 관리 버튼 — 수정(파랑) + 삭제(빨강) */
+function manageBtns_(id){return '<div class="row-actions"><button class="primary" data-edit2="'+esc(id)+'">수정</button><button class="danger-solid" data-del="'+esc(id)+'">삭제</button></div>';}
+function bindManageBtns_(target){
+  target.querySelectorAll('[data-edit2]').forEach(function(b){b.addEventListener('click',function(){openEdit('inouts',b.dataset.edit2);});});
+  target.querySelectorAll('[data-del]').forEach(function(b){b.addEventListener('click',function(){openDelete(b.dataset.del);});});
+}
 function yy_(y){return String(y).slice(2);}
 function switchTab(tab){
   currentTab=tab;
@@ -417,9 +429,6 @@ function bindDateInputs(target){
       }finally{inp.disabled=false;}
     });
   });
-  target.querySelectorAll('[data-edit2]').forEach(function(b){
-    b.addEventListener('click',function(){openEdit('inouts',b.dataset.edit2);});
-  });
 }
 function dateInput_(r){
   return '<input type="date" class="date-cell" data-page-id="'+esc(r.id)+'" data-prev="'+esc(r.date||'')+'" value="'+esc(r.date||'')+'">';
@@ -431,12 +440,14 @@ function renderShipWait(rows){
   if(!rows.length){t.innerHTML='<div class="empty">배송 필요(출고 대기) 항목이 없습니다.</div>';return;}
   t.innerHTML='<div class="table-wrap"><table><thead><tr><th>No.</th><th>거래처</th><th>납품형태</th><th>납품요청일</th><th>납품일자</th><th>주소</th><th>명세표발행</th><th>발송대기</th><th>관리</th></tr></thead><tbody>'+
     rows.map(function(r,i){
-      return '<tr><td>'+(i+1)+'</td><td class="pre">'+esc(r.client||r.title||'—')+'</td><td>'+esc(r.type||'—')+'</td>'+
-        '<td style="white-space:nowrap">'+esc(r.requestLabel||'—')+'</td><td>'+dateInput_(r)+'</td>'+
+      const tdC=isToday_(r.request)?' class="today-td"':'';
+      return '<tr><td>'+(i+1)+'</td><td'+tdC+' class="pre">'+esc(r.client||r.title||'—')+'</td><td'+tdC+'>'+esc(r.type||'—')+'</td>'+
+        '<td style="white-space:nowrap">'+esc(krDow_(r.requestLabel)||'—')+'</td><td>'+dateInput_(r)+'</td>'+
         '<td class="pre">'+esc(r.address||'—')+'</td><td>'+check_(r.spec)+'</td><td>'+check_(r.sendWait)+'</td>'+
-        '<td><button class="secondary" data-edit2="'+esc(r.id)+'">수정</button></td></tr>';
+        '<td>'+manageBtns_(r.id)+'</td></tr>';
     }).join('')+'</tbody></table></div>';
   bindDateInputs(t);
+  bindManageBtns_(t);
 }
 /* ── ③ 본사납품 필요 List (입고 대기) ── */
 function renderInboundWait(rows){
@@ -445,12 +456,14 @@ function renderInboundWait(rows){
   if(!rows.length){t.innerHTML='<div class="empty">본사납품 필요(입고 대기) 항목이 없습니다.</div>';return;}
   t.innerHTML='<div class="table-wrap"><table><thead><tr><th>No.</th><th>거래처</th><th>납품형태</th><th>납품요청일</th><th>납품일자</th><th>발주서발송</th><th>발주서 번호</th><th>관리</th></tr></thead><tbody>'+
     rows.map(function(r,i){
-      return '<tr><td>'+(i+1)+'</td><td class="pre">'+esc(r.client||r.title||'—')+'</td><td>'+esc(r.type||'—')+'</td>'+
-        '<td style="white-space:nowrap">'+esc(r.requestLabel||'—')+'</td><td>'+dateInput_(r)+'</td>'+
+      const tdC=isToday_(r.request)?' class="today-td"':'';
+      return '<tr><td>'+(i+1)+'</td><td'+tdC+' class="pre">'+esc(r.client||r.title||'—')+'</td><td'+tdC+'>'+esc(r.type||'—')+'</td>'+
+        '<td style="white-space:nowrap">'+esc(krDow_(r.requestLabel)||'—')+'</td><td>'+dateInput_(r)+'</td>'+
         '<td>'+check_(r.poSent)+'</td><td>'+esc(r.poNo||'—')+'</td>'+
-        '<td><button class="secondary" data-edit2="'+esc(r.id)+'">수정</button></td></tr>';
+        '<td>'+manageBtns_(r.id)+'</td></tr>';
     }).join('')+'</tbody></table></div>';
   bindDateInputs(t);
+  bindManageBtns_(t);
 }
 /* ── ④ 최근 납품 List ── */
 function renderRecent(rows){
@@ -462,9 +475,9 @@ function renderRecent(rows){
       return '<tr><td>'+(i+1)+'</td><td>'+ioPill_(r.kind,r.title)+'</td><td class="pre">'+esc(r.client||r.title||'—')+'</td>'+
         '<td style="white-space:nowrap">'+esc(r.date||'—')+'</td><td style="white-space:nowrap">'+esc(r.payDate||'—')+'</td>'+
         '<td>'+esc(r.status||'—')+'</td><td>'+check_(r.boxhero)+'</td><td>'+esc(fmtN_(r.courier))+'</td><td>'+check_(r.specSend)+'</td>'+
-        '<td><button class="secondary" data-edit2="'+esc(r.id)+'">수정</button></td></tr>';
+        '<td>'+manageBtns_(r.id)+'</td></tr>';
     }).join('')+'</tbody></table></div>';
-  t.querySelectorAll('[data-edit2]').forEach(function(b){b.addEventListener('click',function(){openEdit('inouts',b.dataset.edit2);});});
+  bindManageBtns_(t);
 }
 async function loadDashboard(force){
   const boxes=['prodBox','shipWaitBox','inboundWaitBox','recentBox'];
@@ -501,8 +514,8 @@ function renderStats(){
   let h='';
   h+='<h3>핵심 요약</h3><div class="stat-grid">'+
      statCard_('총 미수금',fmtK_(s.summary.unpaid)+'원','c-rose','상태=미수 '+fmtK_(s.summary.unpaidCount)+'건')+
-     statCard_('올해 평균 Profit',fmtK_(s.summary.avgProfitThis)+'원','c-blue','출고 '+fmtK_(s.summary.profitOutCntThis)+'건 기준')+
-     statCard_('작년 평균 Profit',fmtK_(s.summary.avgProfitLast)+'원','c-slate','출고 '+fmtK_(s.summary.profitOutCntLast)+'건 기준')+
+     statCard_('올해 평균 Profit',fmtK_(s.summary.avgProfitThis)+'원','c-blue','출고 Profit 합계 ÷'+s.basis.monthNo+'개월')+
+     statCard_('올해 총 입금액',fmtK_(s.summary.inAmtThis)+'원','c-green','입고 '+fmtK_(s.summary.inCntThis)+'건 · Σ입고액 합계')+
      '</div>';
   h+='<div class="stat-grid">'+
      statCard_('올해 판매금 합계',fmtK_(s.summary.salesThis)+'원','c-violet',yy+'년')+
@@ -518,13 +531,10 @@ function renderStats(){
      statCard_('당월 택배비',fmtK_(s.summary.courierMonth)+'원','c-amber',s.basis.thisMonthKey||'')+
      statCard_('전월 택배비',fmtK_(s.summary.courierPrev)+'원','c-amber',s.basis.prevMonthKey||'')+
      statCard_('올해 총 택배비',fmtK_(s.summary.courierYear)+'원','c-slate',yy+'년')+'</div>';
-  h+='<h3>작년('+ly+') 실적</h3><div class="stat-grid">'+
-     statCard_('작년 총 입고량',fmtK_(s.summary.inQtyLast)+'개','c-teal')+
-     statCard_('작년 총 입금액',fmtK_(s.summary.paidLast)+'원','c-green')+
-     statCard_('작년 총 출고량',fmtK_(s.summary.outQtyLast)+'개','c-blue')+
-     statCard_('작년 총 판매금',fmtK_(s.summary.salesLast)+'원','c-violet')+
-     statCard_('작년 총 입고액',fmtK_(s.summary.inAmtLast)+'원','c-amber')+
-     statCard_('작년 Profit 합계',fmtK_(s.summary.profitLast)+'원','c-rose')+
+  h+='<h3>작년('+ly+') 실적 — 총합 / 월평균(÷12)</h3><div class="stat-grid">'+
+     statCard_('작년 총 입고량 / 입고액',fmtK_(s.summary.inQtyLast)+'개 · '+fmtK_(s.summary.inAmtLast)+'원','c-teal','평균 '+fmtK_(s.summary.avgInLast)+'개 · '+fmtK_(s.summary.avgInAmtLast)+'원')+
+     statCard_('작년 총 출고량 / 판매금',fmtK_(s.summary.outQtyLast)+'개 · '+fmtK_(s.summary.salesLast)+'원','c-blue','평균 '+fmtK_(s.summary.avgOutLast)+'개 · '+fmtK_(s.summary.avgSalesLast)+'원')+
+     statCard_('작년 총 Profit / 평균 Profit',fmtK_(s.summary.profitLast)+'원','c-green','평균 '+fmtK_(s.summary.avgProfitLastM)+'원')+
      '</div>';
   h+=monthCards_('월별 총 판매수량 및 판매금 ('+yy+'년 1월~12월)',m.salesQty,'개',m.sales,'원','');
   h+=monthCards_('월별 총 입고수량 및 입고액 ('+yy+'년 1월~12월)',m.inQty,'개',m.inAmt,'원','green');
@@ -544,6 +554,30 @@ async function searchStats(){
       statCard_('Profit',fmtK_(r.profit)+'원','c-green')+statCard_('택배비',fmtK_(r.courier)+'원','c-slate')+
       statCard_('미수금',fmtK_(r.unpaid)+'원','c-rose')+statCard_('평균 Profit',fmtK_(r.avgProfit)+'원','c-slate','출고 건수 기준')+'</div>';
   }catch(e){box.innerHTML='<div class="notice error">'+esc(e.message)+'</div>';}
+}
+/* ══════ v10.0: 정보 삭제 (비밀번호 → Yes/No 최종 확인 → 노션 페이지 삭제) ══════ */
+let deleteTarget=null;
+function openDelete(pageId){
+  deleteTarget=pageId;
+  $('delPw').value='';
+  $('delSub').textContent='페이지 ID: '+pageId;
+  $('deleteModal').classList.remove('hidden');
+  setTimeout(function(){$('delPw').focus();},50);
+}
+async function confirmDelete(){
+  const btn=$('delYes');
+  const pw=$('delPw').value;
+  if(!pw){toast('비밀번호를 입력해주세요.');return;}
+  if(!confirm('정말 삭제할까요?\n\n· 노션 "푸로찜 입출고 DB"의 해당 페이지가 휴지통으로 이동됩니다.\n· 삭제 기록은 변경 이력에 남습니다.'))return;
+  setBusy(btn,true);
+  try{
+    const r=await api('deletePage',{dbKey:'inouts',pageId:deleteTarget,password:pw});
+    $('deleteModal').classList.add('hidden');
+    toast(r.message||'삭제했습니다.');
+    await loadDashboard(true);
+    if(currentTab==='history')loadHistory();
+  }catch(e){toast(e.message,5500);}
+  finally{setBusy(btn,false);}
 }
 /* ── 거래처 관리 ── */
 async function loadList(key,reset){
@@ -792,8 +826,12 @@ $('searchStatsBtn').addEventListener('click',searchStats);
 $('modalClose').addEventListener('click',function(){$('editModal').classList.add('hidden');});
 $('modalCancel').addEventListener('click',function(){$('editModal').classList.add('hidden');});
 $('modalSave').addEventListener('click',saveModal);
+$('delClose').addEventListener('click',function(){$('deleteModal').classList.add('hidden');});
+$('delNo').addEventListener('click',function(){$('deleteModal').classList.add('hidden');});
+$('delYes').addEventListener('click',confirmDelete);
+$('delPw').addEventListener('keydown',function(e){if(e.key==='Enter')confirmDelete();});
 document.addEventListener('keydown',function(e){
-  if(e.key==='Escape'){$('editModal').classList.add('hidden');$('manualModal').classList.add('hidden');}
+  if(e.key==='Escape'){$('editModal').classList.add('hidden');$('manualModal').classList.add('hidden');$('deleteModal').classList.add('hidden');}
 });
 boot();
 </script>
@@ -804,6 +842,7 @@ if('serviceWorker' in navigator){
   });
 }
 </script>
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous"></script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous"></script>
 </body>
 </html>

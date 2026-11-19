@@ -295,7 +295,7 @@ td{padding:8px;border-bottom:1px solid #f1f4f8;vertical-align:middle}
 <div id="toast" style="position:fixed;bottom:18px;left:50%;transform:translateX(-50%);z-index:120;max-width:92vw;background:#172033;color:#fff;padding:12px 16px;border-radius:12px;box-shadow:var(--shadow);display:none;font-size:13px"></div>
 
 <script>
-const GAS_URL='https://script.google.com/macros/s/AKfycbxbHYmw3BebjjZ6MWoTDXOPSWgf_RNZ714JRi6S-VskVL4WjF9hi4KcA1X0XEnAtHWCnA/exec';
+const GAS_URL='https://script.google.com/macros/s/AKfycbydRxm5PUje_GQYAkTlsEcjGSLnxwG1S-8y1gmVs1K7a1-vE7hnjWsej9JO7qVWopWfew/exec';
 let INIT=null,STATS=null,DASH=null;
 let currentTab='dashboard',currentEdit=null;
 let listState={clients:{cursor:null,search:''}};
@@ -356,7 +356,10 @@ async function boot(){
     await api('health',{});
     INIT=await api('initial',{});
     lb.className='on';lb.textContent='연결됨';
-    await Promise.all([loadDashboard(),loadList('clients',true)]);
+    /* v10.0 속도개선: 서버에서 미리 돌린 캐시덕에 대시보드는 보통 즉시 반환됨.
+       거래처 목록을 먼저 당겨 화면을 빨리 채우고, 대시보드는 완료되는 대로 렌더. */
+    await loadList('clients',true);
+    loadDashboard().catch(function(e){console.warn('대시보드 로드 지연 실패:',e);});
   }catch(e){
     lb.className='off';lb.textContent='연결 끊김';
     toast('Notion 연결에 실패했습니다: '+e.message,7000);
@@ -481,11 +484,15 @@ function renderRecent(rows){
 }
 async function loadDashboard(force){
   const boxes=['prodBox','shipWaitBox','inboundWaitBox','recentBox'];
-  boxes.forEach(function(b){$(b).innerHTML='<div class="empty"><span class="spinner"></span> 노션 조회 중</div>';});
+  /* v10.0 속도개선: 이미 그려둔 데이터가 있으면 지우지 않고 조용히 갱신(실패해도 기존 화면 유지) */
+  if(!DASH)boxes.forEach(function(b){$(b).innerHTML='<div class="empty"><span class="spinner"></span> 노션 조회 중</div>';});
   try{
     DASH=await api('getDashboard',force?{force:true}:{});
     renderProducts(DASH.products);renderShipWait(DASH.shipWait);renderInboundWait(DASH.inboundWait);renderRecent(DASH.recent);
-  }catch(e){boxes.forEach(function(b){$(b).innerHTML='<div class="notice error">'+esc(e.message)+'</div>';});}
+  }catch(e){
+    if(!DASH)boxes.forEach(function(b){$(b).innerHTML='<div class="notice error">'+esc(e.message)+'</div>';});
+    else toast('갱신 실패(기존 화면 유지): '+e.message,5500);
+  }
 }
 /* ══════════════════════════════════════════════════════════
    총판 통계 — 컬러 카드 + 월별 3카드(수량+금액)
@@ -842,6 +849,7 @@ if('serviceWorker' in navigator){
   });
 }
 </script>
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous"></script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous"></script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous"></script>
 </body>

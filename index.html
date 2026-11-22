@@ -154,12 +154,18 @@ td{padding:8px;border-bottom:1px solid #f1f4f8;vertical-align:middle}
   #refreshBtn .tx{display:none}
   #pwBtn .tx{display:none}
 }
-/* 모바일: 거래처·납품형태 2줄 고정 (PC는 기존 그대로 한 줄) */
+/* 모바일: 거래처·납품형태 2줄 고정 (PC는 기존 그대로 한 줄)
+   v10.0 최종(개선): 거래처 열은 ①거래처명(1줄) ②수량/금액(1줄) 무조건 2줄 고정.
+   td에 width:1%+nowrap 을 주면 표가 내용에 딱 맞춰 '최소 폭'으로 자동 조절되고,
+   l1/l2 각 줄에 nowrap 을 걸어 줄바꿈 없이 풀로 보입니다. (②③④ 리스트 모두 적용) */
 @media(max-width:700px){
   .c-client .l2{display:block;white-space:nowrap}
   .c-client .l2::before{content:''}
   .c-type .l2{display:block;white-space:nowrap}
   .c-type .l2::before{content:''}
+  #shipWaitBox td.c-client,#inboundWaitBox td.c-client,#recentBox td.c-client{width:1%;min-width:0;white-space:nowrap}
+  #shipWaitBox td.c-client .l1,#inboundWaitBox td.c-client .l1,#recentBox td.c-client .l1,
+  #shipWaitBox td.c-client .l2,#inboundWaitBox td.c-client .l2,#recentBox td.c-client .l2{display:block;white-space:nowrap}
   .col-no{width:28px;min-width:24px}
 }
 /* ── 모바일 ── */
@@ -337,7 +343,7 @@ td{padding:8px;border-bottom:1px solid #f1f4f8;vertical-align:middle}
 <div id="toast" style="position:fixed;bottom:18px;left:50%;transform:translateX(-50%);z-index:120;max-width:92vw;background:#172033;color:#fff;padding:12px 16px;border-radius:12px;box-shadow:var(--shadow);display:none;font-size:13px"></div>
 
 <script>
-const GAS_URL='https://script.google.com/macros/s/AKfycbw2ZogVlRl_pn-t-ZtgCR1E2Uj-KASFuOh3b5vnWU5Ri620H-VfYoWlVMZ-Qd28GENITA/exec';
+const GAS_URL='https://script.google.com/macros/s/AKfycbzxFKCyfWwerqMSyKpJUyrkrP7MpkaovcTX5EGA0yH7b0Qx4T-GI5kxmieKZM04dI2TPQ/exec';
 let INIT=null,STATS=null,DASH=null;
 let currentTab='dashboard',currentEdit=null;
 let listState={clients:{cursor:null,search:''}};
@@ -385,12 +391,14 @@ function clientParts_(v){
   if(i<0)return [raw,''];
   return [raw.slice(0,i).trim(), raw.slice(i+1).trim()];
 }
-/* v10.0 최종(개선): 수량·금액 3자리 콤마 누락 보정 (표시 전용 — 원본 값은 변경 없음) */
+/* v10.0 최종(개선): 수량·금액 3자리 콤마 누락 보정 (표시 전용 — 원본 값은 변경 없음)
+   · 콤마가 없던 숫자("100000")와 콤마가 있던 숫자("100,000") 모두 Number 로 변환해
+     toLocaleString('ko-KR') 로 항상 3자리 콤마를 보장 (모바일 콤마 누락 방지) */
 function amtComma_(s){
-  let t=String(s==null?'':s);
+  let t=String(s==null?'':s).trim();
   const m=t.match(/^(\d+)\s*개\s*\/\s*([\d,\s]+?)\s*원$/);
   if(m)return Number(m[1]).toLocaleString('ko-KR')+'개/'+Number(m[2].replace(/[,,\s]/g,'')).toLocaleString('ko-KR')+'원';
-  if(/원\s*$/.test(t))return t.replace(/\d{4,}/g,function(x){return Number(x).toLocaleString('ko-KR');});
+  if(/원\s*$/.test(t))return t.replace(/\d[\d,]*/g,function(x){const n=Number(String(x).replace(/,/g,''));return isFinite(n)?n.toLocaleString('ko-KR'):x;});
   return t;
 }
 function clientCell_(v){
@@ -579,11 +587,12 @@ function renderRecent(rows){
   const t=$('recentBox');
   rows=rows||[];
   if(!rows.length){t.innerHTML='<div class="empty">최근 7일 동안 납품 기록이 없습니다.</div>';return;}
-  t.innerHTML='<div class="table-wrap"><table><thead><tr><th class="col-no">No.</th><th>입출고</th><th>거래처</th><th>납품일자</th><th>입금일자</th><th>상태</th><th>박스히어로</th><th>택배비</th><th>명세표 발송</th><th>관리</th></tr></thead><tbody>'+
+  t.innerHTML='<div class="table-wrap"><table><thead><tr><th class="col-no">No.</th><th>입출고</th><th>거래처</th><th>박스히어로</th><th>명세표 발송</th><th>납품일자</th><th>입금일자</th><th>상태</th><th>택배비</th><th>관리</th></tr></thead><tbody>'+
     rows.map(function(r,i){
       return '<tr><td class="col-no">'+(i+1)+'</td><td>'+ioPill_(r.kind,r.title)+'</td><td class="c-client pre">'+clientCell_(r.client||r.title||'—')+'</td>'+
+        '<td>'+check_(r.boxhero)+'</td><td>'+check_(r.specSend)+'</td>'+
         '<td class="nowrap">'+esc(mdDow_(r.date))+'</td><td class="nowrap">'+esc(mdDow_(r.payDate))+'</td>'+
-        '<td>'+esc(r.status||'—')+'</td><td>'+check_(r.boxhero)+'</td><td>'+esc(fmtN_(r.courier))+'</td><td>'+check_(r.specSend)+'</td>'+
+        '<td>'+esc(r.status||'—')+'</td><td>'+esc(fmtN_(r.courier))+'</td>'+
         '<td>'+manageBtns_(r.id)+'</td></tr>';
     }).join('')+'</tbody></table></div>';
   bindManageBtns_(t);
@@ -1161,8 +1170,6 @@ if('serviceWorker' in navigator){
   });
 }
 </script>
-<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous"></script>
-<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous"></script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous"></script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous"></script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous"></script>

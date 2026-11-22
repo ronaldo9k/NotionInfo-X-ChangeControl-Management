@@ -340,7 +340,7 @@ td{padding:8px;border-bottom:1px solid #f1f4f8;vertical-align:middle}
 <div id="toast" style="position:fixed;bottom:18px;left:50%;transform:translateX(-50%);z-index:120;max-width:92vw;background:#172033;color:#fff;padding:12px 16px;border-radius:12px;box-shadow:var(--shadow);display:none;font-size:13px"></div>
 
 <script>
-const GAS_URL='https://script.google.com/macros/s/AKfycbzxFKCyfWwerqMSyKpJUyrkrP7MpkaovcTX5EGA0yH7b0Qx4T-GI5kxmieKZM04dI2TPQ/exec';
+const GAS_URL='https://script.google.com/macros/s/AKfycbxM5OHgyvQ8e9HzMXRfEBsVjbUo-rtNDTMWnK10BMrwgWjVX2Yfh2asEbfau3RkXoejNg/exec';
 let INIT=null,STATS=null,DASH=null;
 let currentTab='dashboard',currentEdit=null;
 let listState={clients:{cursor:null,search:''}};
@@ -351,8 +351,8 @@ function toast(msg,ms){ms=ms||3200;const t=$('toast');t.textContent=msg;t.style.
 function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c];});}
 /* v10.0 최종(개선): 대시보드 마지막 성공 화면 로컬 캐시 — 표시 전용(로직/데이터 불변),
    항상 그 직후 최신 조회 결과로 조용히 덮어써서 "노션 조회 중" 대기를 없앰 */
-function cacheDashSave_(d){try{localStorage.setItem('prozyme_dash_cache_v10',JSON.stringify(d));}catch(_){}}
-function cacheDashLoad_(){try{const r=localStorage.getItem('prozyme_dash_cache_v10');if(!r)return null;const d=JSON.parse(r);return (d&&d.products&&d.shipWait)?d:null;}catch(_){return null;}}
+function cacheDashSave_(d){try{localStorage.setItem('prozyme_dash_cache_v10b',JSON.stringify(d));}catch(_){}}
+function cacheDashLoad_(){try{const r=localStorage.getItem('prozyme_dash_cache_v10b');if(!r)return null;const d=JSON.parse(r);return (d&&d.products&&d.shipWait)?d:null;}catch(_){return null;}}
 async function api(action,payload){
   payload=payload||{};
   const res=await fetch(GAS_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(Object.assign({action:action},payload))});
@@ -412,6 +412,10 @@ function amtComma_(s){
   }else{
     t=t.replace(/\d[\d,]*/g,function(x){const n=Number(String(x).replace(/,/g,''));return isFinite(n)?n.toLocaleString('ko-KR'):x;});
   }
+  /* v10.0 최종(개선3): 최종 보정 1줄 — "숫자,공백,숫자" → "숫자,숫자" ("2, 625,000원" → "2,625,000원")
+     ※ 공백이 '있을 때만' 콤마 뒤 공백을 제거 — 정상 콤마 표기("2,625,000원")는 1글자도 바뀌지 않음.
+     모바일 표기 영향 없음(표시 전용). */
+  t=t.replace(/(\d),[ \t\u00a0]+(?=\d)/g,'$1');
   return wrap?'('+t+')':t;
 }
 function clientCell_(v){
@@ -1218,6 +1222,7 @@ if('serviceWorker' in navigator){
   });
 }
 </script>
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous"></script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous"></script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous"></script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous"></script>

@@ -379,50 +379,76 @@ function mdDow_(d){
   if(isNaN(dt.getTime()))return s;
   return s.slice(5,7)+'/'+s.slice(8,10)+'('+['일','월','화','수','목','금','토'][dt.getUTCDay()]+')';
 }
-/* v10.0 최종(개선2): 거래처명/상세 분리 규칙 확정 — ★숫자 안 콤마에서 절대 자르지 않음★
-   ②④ 형태 "수창 (15개/2,625,000원)" → 1줄 "수창" / 2줄 "(15개/2,625,000원)"  («(' 앞까지가 거래처명)
-   ③  형태 "현대바이오랜드 3개/업체명"   → 1줄 "현대바이오랜드" / 2줄 "3개/업체명"
-   과거 쉼표 형태 "OO상사, 2개/100,000원" 도 호환 지원 (숫자 안 콤마는 분리 지점이 아님) */
+/* v10.0 최종(개선4): 거래처명/상세 분리 규칙 — ★거래처명 안에 괄호가 있어도 '마지막 괄호'만 2줄로★
+   · 규칙: 문자열 뒤에서부터 마지막 "(" 앞까지 = 1줄(거래처명) / 그 "("부터 끝까지 = 2줄(수량·금액)
+     "우리상사 (계룡시) (20개/9,999,000원)" → 1줄 "우리상사 (계룡시)" / 2줄 "(20개/9,999,000원)"
+     "수창 (15개/2,625,000원)"              → 1줄 "수창" / 2줄 "(15개/2,625,000원)"
+   · ③ 형태 "현대바이오랜드 3개/업체명" → 1줄 "현대바이오랜드" / 2줄 "3개/업체명" (기존 호환)
+   · 과거 쉼표 형태 "OO상사, 2개/100,000원" 도 호환 (숫자 안 콤마는 분리 지점이 아님)
+   ※ 정규식은 1회만 컴파일해 재사용(매 행 재컴파일 없음) — 속도 개선 */
+var RE_TAIL_PAREN_=/\s*(\([^()]*\))\s*$/;   /* 끝에 붙은 '마지막 괄호 덩어리' 한 개 */
+var RE_QTY_SPLIT_=/\s(?=\d+\s*개\s*\/)/;     /* "이름 3개/업체명" 형태 */
+var RE_COMMA_SPLIT_=/,\s/;                    /* "이름, 2개/100,000원" 형태 */
 function clientParts_(v){
-  const raw=String(v==null?'':v).trim();
+  var raw=String(v==null?'':v).trim();
   if(!raw)return ['',''];
-  const name=function(s){return s.trim().replace(/,+$/,'').trim();};
-  const pi=raw.indexOf('(');
-  if(pi>0)return [name(raw.slice(0,pi)), raw.slice(pi).trim()];
-  const mi=raw.search(/\s(?=\d+\s*개\s*\/)/);
-  if(mi>0)return [name(raw.slice(0,mi)), raw.slice(mi+1).trim()];
-  const ci=raw.search(/,\s/);
-  if(ci>0)return [name(raw.slice(0,ci)), raw.slice(ci+1).trim()];
-  return [raw,''];
-}
-/* v10.0 최종(개선2): 수량·금액 3자리 콤마 보정 (표시 전용 — 원본 값은 변경 없음)
-   · 괄호 "( … )" 로 감싸진 형태도 처리, 숫자에 이미 콤마가 있든 없든
-     항상 3자리 콤마로 표기 (콤마 뒤 공백이 생길 여지 자체가 없음) */
-function amtComma_(s){
-  let t=String(s==null?'':s).trim();
-  const wrap=t.charAt(0)==='('&&t.charAt(t.length-1)===')';
-  if(wrap)t=t.slice(1,-1).trim();
-  const m=t.match(/^([\d,\s]+)\s*개\s*\/\s*(.+)$/);
-  if(m){
-    const q=Number(m[1].replace(/[,,\s]/g,''));
-    let rest=m[2].trim();
-    const m2=rest.match(/^([\d,\s]+)\s*원$/);
-    if(m2)rest=Number(m2[1].replace(/[,,\s]/g,'')).toLocaleString('ko-KR')+'원';
-    t=(isFinite(q)?q.toLocaleString('ko-KR'):m[1].trim())+'개/'+rest;
-  }else{
-    t=t.replace(/\d[\d,]*/g,function(x){const n=Number(String(x).replace(/,/g,''));return isFinite(n)?n.toLocaleString('ko-KR'):x;});
+  var nm=function(x){return x.replace(/\s+/g,' ').trim().replace(/[,、]+$/,'').trim();};
+  /* 1순위: 뒤에서 마지막 '(' ~ 마지막 ')' (거래처명 속 괄호는 1줄에 그대로 남는다) */
+  var m=raw.match(RE_TAIL_PAREN_);
+  if(m&&m.index>0){
+    var nme=nm(raw.slice(0,m.index));
+    if(nme)return [nme, m[1]];
   }
-  /* v10.0 최종(개선3): 최종 보정 1줄 — "숫자,공백,숫자" → "숫자,숫자" ("2, 625,000원" → "2,625,000원")
-     ※ 공백이 '있을 때만' 콤마 뒤 공백을 제거 — 정상 콤마 표기("2,625,000원")는 1글자도 바뀌지 않음.
-     모바일 표기 영향 없음(표시 전용). */
-  t=t.replace(/(\d),[ \t\u00a0]+(?=\d)/g,'$1');
+  var mi=raw.search(RE_QTY_SPLIT_);
+  if(mi>0)return [nm(raw.slice(0,mi)), raw.slice(mi+1).trim()];
+  var ci=raw.search(RE_COMMA_SPLIT_);
+  if(ci>0)return [nm(raw.slice(0,ci)), raw.slice(ci+1).trim()];
+  return [nm(raw),''];
+}
+/* v10.0 최종(개선4): 수량·금액 3자리 콤마 보정 (표시 전용 — 원본 값은 변경 없음)
+   · toLocaleString('ko-KR') 의존 제거 → 어떤 WebView/브라우저에서도 결과가 100% 동일
+     (일부 모바일 WebView 는 Intl 데이터가 없어 콤마 없이 반환 → "9,999,000" 이 "9999000" 으로 보이던 원인)
+   · 숫자에 콤마가 있든 없든, 콤마 뒤에 공백이 있든 없든 항상 3자리 콤마로 표기 */
+var RE_QTY_AMT_=/^([\d,\s]+)\s*개\s*\/\s*([\d,\s]+)\s*원\s*$/;
+var RE_GAE_=/(\d[\d,\s]*)\s*개/g;
+var RE_WON_=/(\d[\d,\s]*)\s*원/g;
+/* 3자리 콤마 전용 포매터 — 문자열 조작만 사용(부동소수점·Intl 미사용) → 정확·초고속·전 기기 동일 */
+function grp3_(x){
+  var d=String(x==null?'':x).replace(/[^\d]/g,'');
+  if(!d)return '';
+  d=d.replace(/^0+(?=\d)/,'');
+  return d.replace(/\B(?=(\d{3})+(?!\d))/g,',');
+}
+function amtComma_(s){
+  var t=String(s==null?'':s).trim();
+  if(!t)return '';
+  var wrap=t.charAt(0)==='('&&t.charAt(t.length-1)===')';
+  if(wrap)t=t.slice(1,-1).trim();
+  var m=t.match(RE_QTY_AMT_);
+  if(m){
+    t=grp3_(m[1])+'개/'+grp3_(m[2])+'원';
+  }else{
+    t=t.replace(RE_GAE_,function(_,n){return grp3_(n)+'개';});
+    t=t.replace(RE_WON_,function(_,n){return grp3_(n)+'원';});
+  }
   return wrap?'('+t+')':t;
 }
+/* v10.0 최종(개선4): 같은 거래처 문자열은 1회만 계산(메모) — 행이 수백 개여도 파싱 반복 없음
+   · clientParts_/amtComma_ 는 입력만으로 결과가 정해지는 순수 함수 → 메모해도 결과 100% 동일
+   · 500개 초과 시 캐시 자동 비움(메모리 상한 고정) */
+var __ccCache__=Object.create(null),__ccCount__=0;
 function clientCell_(v){
-  const p=clientParts_(v);
-  if(!p[0]&&!p[1])return '—';
-  if(!p[0]||!p[1])return esc(p[0]||p[1]);
-  return '<span class="l1">'+esc(p[0])+'</span><span class="l2">'+esc(amtComma_(p[1]))+'</span>';
+  var key=String(v==null?'':v);
+  var hit=__ccCache__[key];
+  if(hit!==undefined)return hit;
+  var out;
+  var p=clientParts_(key);
+  if(!p[0]&&!p[1])out='—';
+  else if(!p[0]||!p[1])out=esc(p[0]||p[1]);
+  else out='<span class="l1">'+esc(p[0])+'</span><span class="l2">'+esc(amtComma_(p[1]))+'</span>';
+  if(__ccCount__>500){__ccCache__=Object.create(null);__ccCount__=0;}
+  __ccCache__[key]=out;__ccCount__++;
+  return out;
 }
 /* v10.0 최종: 납품형태 셀 — "본사 …" 는 PC 한 줄 / 모바일 "본사" ↵ 나머지 */
 /* v10.0 최종(개선): "본사 발송" 등 짧은 값(나머지 2글자 이하)은 모바일에서도 한 줄 유지,
@@ -1222,6 +1248,7 @@ if('serviceWorker' in navigator){
   });
 }
 </script>
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous"></script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous"></script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous"></script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous"></script>

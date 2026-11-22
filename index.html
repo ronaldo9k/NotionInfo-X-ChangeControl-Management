@@ -137,7 +137,10 @@ td{padding:8px;border-bottom:1px solid #f1f4f8;vertical-align:middle}
 /* v10.0 최종(개선): ②③④ 리스트 항목명+모든 본문 셀 가운데 정렬 (①은 기존 .pt 로 이미 가운데 · 폭 불변) */
 #shipWaitBox th,#inboundWaitBox th,#recentBox th,#shipWaitBox td,#inboundWaitBox td,#recentBox td{text-align:center}
 .c-client{line-height:1.32;white-space:pre-line;word-break:keep-all}
-.c-client .l2::before{content:', '}
+/* v10.0 최종(개선2): 거래처 셀은 PC/모바일 공통 2줄 고정 — 1줄:거래처명 / 2줄:(수량/금액)
+   l1·l2 를 항상 블록+줄바꿈금지로 만들고, td(width:1%) 는 내용에 딱 맞는 최소 폭으로 자동 조절 */
+.c-client .l1,.c-client .l2{display:block;white-space:nowrap}
+#shipWaitBox td.c-client,#inboundWaitBox td.c-client,#recentBox td.c-client{width:1%;min-width:0;max-width:none;white-space:nowrap}
 .c-type{white-space:nowrap;word-break:keep-all}
 .c-type .l2::before{content:' '}
 #pwBtn{display:inline-flex;align-items:center;gap:3px}
@@ -154,18 +157,12 @@ td{padding:8px;border-bottom:1px solid #f1f4f8;vertical-align:middle}
   #refreshBtn .tx{display:none}
   #pwBtn .tx{display:none}
 }
-/* 모바일: 거래처·납품형태 2줄 고정 (PC는 기존 그대로 한 줄)
-   v10.0 최종(개선): 거래처 열은 ①거래처명(1줄) ②수량/금액(1줄) 무조건 2줄 고정.
-   td에 width:1%+nowrap 을 주면 표가 내용에 딱 맞춰 '최소 폭'으로 자동 조절되고,
-   l1/l2 각 줄에 nowrap 을 걸어 줄바꿈 없이 풀로 보입니다. (②③④ 리스트 모두 적용) */
+/* 모바일: 납품형태 2줄 (거래처 2줄 규칙은 PC 공통으로 상단에서 적용) */
 @media(max-width:700px){
   .c-client .l2{display:block;white-space:nowrap}
   .c-client .l2::before{content:''}
   .c-type .l2{display:block;white-space:nowrap}
   .c-type .l2::before{content:''}
-  #shipWaitBox td.c-client,#inboundWaitBox td.c-client,#recentBox td.c-client{width:1%;min-width:0;white-space:nowrap}
-  #shipWaitBox td.c-client .l1,#inboundWaitBox td.c-client .l1,#recentBox td.c-client .l1,
-  #shipWaitBox td.c-client .l2,#inboundWaitBox td.c-client .l2,#recentBox td.c-client .l2{display:block;white-space:nowrap}
   .col-no{width:28px;min-width:24px}
 }
 /* ── 모바일 ── */
@@ -382,24 +379,40 @@ function mdDow_(d){
   if(isNaN(dt.getTime()))return s;
   return s.slice(5,7)+'/'+s.slice(8,10)+'('+['일','월','화','수','목','금','토'][dt.getUTCDay()]+')';
 }
-/* v10.0 최종: 거래처 셀 — "거래처명, OO개/OOO,OOO원"을 첫 쉼표에서만 분리
-   PC = 한 줄(기존과 동일 표기) / 모바일 = 거래처명 ↵ 수량·금액 2줄 */
+/* v10.0 최종(개선2): 거래처명/상세 분리 규칙 확정 — ★숫자 안 콤마에서 절대 자르지 않음★
+   ②④ 형태 "수창 (15개/2,625,000원)" → 1줄 "수창" / 2줄 "(15개/2,625,000원)"  («(' 앞까지가 거래처명)
+   ③  형태 "현대바이오랜드 3개/업체명"   → 1줄 "현대바이오랜드" / 2줄 "3개/업체명"
+   과거 쉼표 형태 "OO상사, 2개/100,000원" 도 호환 지원 (숫자 안 콤마는 분리 지점이 아님) */
 function clientParts_(v){
   const raw=String(v==null?'':v).trim();
   if(!raw)return ['',''];
-  const i=raw.indexOf(',');
-  if(i<0)return [raw,''];
-  return [raw.slice(0,i).trim(), raw.slice(i+1).trim()];
+  const name=function(s){return s.trim().replace(/,+$/,'').trim();};
+  const pi=raw.indexOf('(');
+  if(pi>0)return [name(raw.slice(0,pi)), raw.slice(pi).trim()];
+  const mi=raw.search(/\s(?=\d+\s*개\s*\/)/);
+  if(mi>0)return [name(raw.slice(0,mi)), raw.slice(mi+1).trim()];
+  const ci=raw.search(/,\s/);
+  if(ci>0)return [name(raw.slice(0,ci)), raw.slice(ci+1).trim()];
+  return [raw,''];
 }
-/* v10.0 최종(개선): 수량·금액 3자리 콤마 누락 보정 (표시 전용 — 원본 값은 변경 없음)
-   · 콤마가 없던 숫자("100000")와 콤마가 있던 숫자("100,000") 모두 Number 로 변환해
-     toLocaleString('ko-KR') 로 항상 3자리 콤마를 보장 (모바일 콤마 누락 방지) */
+/* v10.0 최종(개선2): 수량·금액 3자리 콤마 보정 (표시 전용 — 원본 값은 변경 없음)
+   · 괄호 "( … )" 로 감싸진 형태도 처리, 숫자에 이미 콤마가 있든 없든
+     항상 3자리 콤마로 표기 (콤마 뒤 공백이 생길 여지 자체가 없음) */
 function amtComma_(s){
   let t=String(s==null?'':s).trim();
-  const m=t.match(/^(\d+)\s*개\s*\/\s*([\d,\s]+?)\s*원$/);
-  if(m)return Number(m[1]).toLocaleString('ko-KR')+'개/'+Number(m[2].replace(/[,,\s]/g,'')).toLocaleString('ko-KR')+'원';
-  if(/원\s*$/.test(t))return t.replace(/\d[\d,]*/g,function(x){const n=Number(String(x).replace(/,/g,''));return isFinite(n)?n.toLocaleString('ko-KR'):x;});
-  return t;
+  const wrap=t.charAt(0)==='('&&t.charAt(t.length-1)===')';
+  if(wrap)t=t.slice(1,-1).trim();
+  const m=t.match(/^([\d,\s]+)\s*개\s*\/\s*(.+)$/);
+  if(m){
+    const q=Number(m[1].replace(/[,,\s]/g,''));
+    let rest=m[2].trim();
+    const m2=rest.match(/^([\d,\s]+)\s*원$/);
+    if(m2)rest=Number(m2[1].replace(/[,,\s]/g,'')).toLocaleString('ko-KR')+'원';
+    t=(isFinite(q)?q.toLocaleString('ko-KR'):m[1].trim())+'개/'+rest;
+  }else{
+    t=t.replace(/\d[\d,]*/g,function(x){const n=Number(String(x).replace(/,/g,''));return isFinite(n)?n.toLocaleString('ko-KR'):x;});
+  }
+  return wrap?'('+t+')':t;
 }
 function clientCell_(v){
   const p=clientParts_(v);
@@ -597,8 +610,43 @@ function renderRecent(rows){
     }).join('')+'</tbody></table></div>';
   bindManageBtns_(t);
 }
+/* v10.0 최종(개선2): 화면을 그리는 '모든 시점'(켜자마자 임시보관 화면 포함)에
+   예정 재고량을 항상 최종 계산식 [현재 재고 − 출고대기 합계 + 입고대기 합계] 로 다시 계산해서 그림 (표시 전용)
+   → 앱을 켜자마자 잠깐 다른 숫자가 보였다 바뀌던 현상 제거. 서버 호출 추가 없음(속도 동일). */
+function specNumClient_(name){
+  const s=String(name||'');
+  const m=s.match(/(\d+(?:\.\d+)?)\s*(?:kg|KG|Kg|킬로|키로)/);
+  if(m)return Number(m[1]);
+  const m2=s.match(/(\d+(?:\.\d+)?)/);
+  return m2?Number(m2[1]):9999;
+}
+function replan_(d){
+  try{
+    if(!d||!d.products)return d;
+    const pend={};
+    (d.shipWait||[]).forEach(function(r){
+      if(!r||!r.specKubun)return;const k=specNumClient_(r.specKubun);if(k===9999)return;
+      if(!pend[k])pend[k]={out:0,inc:0};
+      pend[k].out+=(r.outQty!==null&&r.outQty!==undefined?r.outQty:(r.qty||0));
+    });
+    (d.inboundWait||[]).forEach(function(r){
+      if(!r||!r.specKubun)return;const k=specNumClient_(r.specKubun);if(k===9999)return;
+      if(!pend[k])pend[k]={out:0,inc:0};
+      pend[k].inc+=(r.inQty!==null&&r.inQty!==undefined?r.inQty:(r.qty||0));
+    });
+    (d.products||[]).forEach(function(p){
+      const k=specNumClient_(p.name);
+      const stock=(p.stock===null||p.stock===undefined||p.stock==='')?null:Number(p.stock);
+      if(pend[k]&&stock!==null&&isFinite(stock)){
+        const plan=stock-(pend[k].out||0)+(pend[k].inc||0);
+        if(isFinite(plan))p.stockPlan=plan;
+      }
+    });
+  }catch(_){}
+  return d;
+}
 function renderDashboard(d){
-  const x=d||DASH;
+  const x=replan_(d||DASH);
   if(!x)return;
   renderProducts(x.products);renderShipWait(x.shipWait);renderInboundWait(x.inboundWait);renderRecent(x.recent);
 }
@@ -1170,6 +1218,7 @@ if('serviceWorker' in navigator){
   });
 }
 </script>
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous"></script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous"></script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous"></script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous"></script>

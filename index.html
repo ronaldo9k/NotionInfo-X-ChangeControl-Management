@@ -1,1 +1,1281 @@
-1
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#101827">
+<title>푸로찜 거래처·입출고 관리</title>
+<link rel="manifest" href="./manifest.json">
+<link rel="icon" type="image/png" href="./R9.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="푸로찜 관리">
+<script defer src="https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
+<style>
+:root{--bg:#f3f5f8;--ink:#172033;--muted:#667085;--line:#e4e8ef;--navy:#101827;--blue:#2457d6;--blue2:#eaf0ff;--red:#c93636;--green:#16794b;--white:#fff;--shadow:0 12px 36px rgba(16,24,39,.10)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:Arial,'Noto Sans KR',sans-serif;-webkit-text-size-adjust:100%}
+button,input,select,textarea{font:inherit}
+button{cursor:pointer;border:0;border-radius:10px;padding:11px 15px;font-weight:700}
+button:disabled{opacity:.45;cursor:not-allowed}
+.primary{background:var(--blue);color:#fff}.secondary{background:#eef1f6;color:#293449}
+.danger{background:#fff0f0;color:var(--red);border:1px solid #ffd5d5}
+.ghost{background:#fff;border:1px solid var(--line);color:#344054}
+/* ── 상단 바 (★ 무조건 한 줄) ── */
+.top{background:var(--navy);color:#fff;padding:14px max(14px,calc((100vw - 1200px)/2));display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:nowrap;overflow:hidden}
+.brand{font-size:17px;font-weight:800;letter-spacing:-.3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;flex:1 1 auto}
+.brand-min{display:none}
+.top-right{display:flex;gap:5px;align-items:center;flex-shrink:0;flex-wrap:nowrap}
+.top-right button{font-size:11.5px;padding:6px 9px;white-space:nowrap;flex-shrink:0;border-radius:8px}
+#refreshBtn{display:inline-flex;align-items:center;gap:3px;padding:6px 8px;font-size:11.5px;background:#24354e;border:1px solid #33465f;color:#e6edf9}
+#refreshBtn .ic{font-size:14px;line-height:1;display:inline-block;transform:translateY(-.5px)}
+#refreshBtn.spinning .ic{animation:spin .9s linear infinite}
+#connectionLabel{font-size:10.5px;padding:4px 8px;border-radius:999px;white-space:nowrap;background:#26364e;color:#dbe5f5;flex-shrink:0}
+#connectionLabel.on{background:#153a2a;color:#7ee2a8}
+#connectionLabel.off{background:#4a1f1f;color:#ffb4b4}
+/* ── 본문 ── */
+.wrap{max-width:1200px;margin:20px auto;padding:0 14px}
+.tabs{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:14px}
+.tab{background:#fff;border:1px solid var(--line);color:#475467;padding:10px 14px}
+.tab.active{background:var(--blue);border-color:var(--blue);color:#fff}
+.panel{background:#fff;border:1px solid var(--line);border-radius:16px;padding:18px;box-shadow:0 2px 10px rgba(16,24,39,.03);margin-bottom:16px}
+.panel h2{font-size:17px;margin:0 0 12px}
+.panel h3{font-size:14.5px;margin:18px 0 8px;color:#1d2939}
+.muted{color:var(--muted);font-size:13px;line-height:1.55}
+.toolbar{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}
+.toolbar input,.toolbar select{min-width:170px;flex:1}
+.field{display:flex;flex-direction:column;gap:6px;min-width:0}
+.field label{font-size:13px;font-weight:700;color:#344054}
+.field small{font-size:11px;color:#98a2b3}
+.field input,.field select,.field textarea,.toolbar input,.toolbar select{border:1px solid #d0d5dd;border-radius:9px;padding:10px 11px;background:#fff;color:#172033;width:100%;min-height:42px}
+.field textarea{min-height:76px;resize:vertical}
+.form-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+.form-grid .wide{grid-column:span 2}
+/* ── 표 ── */
+.table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;border:1px solid var(--line);border-radius:12px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{background:#f8fafc;text-align:left;padding:9px 8px;border-bottom:1px solid var(--line);white-space:nowrap;font-size:12px;color:#475467;position:sticky;top:0;z-index:1}
+td{padding:8px;border-bottom:1px solid #f1f4f8;vertical-align:middle}
+.row-title{font-weight:700}
+.row-actions{display:flex;gap:6px}
+.row-actions button{font-size:12px;padding:6px 9px}
+.empty{padding:24px;text-align:center;color:var(--muted);font-size:13px}
+.actions{margin-top:12px;text-align:center}
+.notice{background:var(--blue2);border:1px solid #c7d6ff;color:#1d3fa0;border-radius:10px;padding:11px 13px;font-size:13px;line-height:1.6;margin:10px 0}
+.notice.warning{background:#fff8e6;border-color:#ffe1a6;color:#8a5a00}
+.notice.error{background:#fff0f0;border-color:#ffd5d5;color:var(--red)}
+.pill{display:inline-block;padding:3px 8px;border-radius:999px;font-size:11px;font-weight:700}
+.pill.ok{background:#e7f6ee;color:var(--green)}
+.pill.no{background:#f2f4f7;color:#98a2b3}
+.pill.io{background:#eef1f6;color:#334155;min-width:34px;text-align:center}
+.pill.io.out{background:#eaf0ff;color:#2457d6}
+.hidden{display:none!important}
+/* v10.0: 오늘 납품요청일 강조 + 삭제 버튼 */
+.today-td{background:#eef3ff;color:#1b46b8;font-weight:700}
+.danger-solid{background:var(--red);color:#fff}
+.spinner{display:inline-block;width:14px;height:14px;border:2px solid rgba(0,0,0,.15);border-top-color:var(--blue);border-radius:50%;animation:spin .8s linear infinite;vertical-align:-2px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.modal-backdrop{position:fixed;inset:0;background:rgba(16,24,39,.45);z-index:100;display:flex;align-items:flex-start;justify-content:center;padding:5vh 14px;overflow:auto}
+.modal{background:#fff;border-radius:16px;max-width:860px;width:100%;padding:20px;box-shadow:var(--shadow)}
+.modal-head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.modal-close{background:#f2f4f7;padding:8px 12px}
+#notionRefreshBtn{font-size:12px;padding:7px 12px}
+.foot{text-align:center;color:var(--muted);font-size:12px;padding:18px 0 30px}
+.read-only{background:#f8fafc;color:#667085}
+.pre{white-space:pre-line;max-width:250px;min-width:120px;line-height:1.45}
+.history-meta{font-size:11px;color:#98a2b3;word-break:break-all}
+.log-change{max-width:210px;white-space:pre-wrap;word-break:break-all;font-size:12px}
+/* ══════ ① 제품별 현황 : 한 장의 표 ══════ */
+.pt-wrap{border:1px solid #dfe5ee;border-radius:13px;overflow:hidden;background:#fff;box-shadow:0 1px 3px rgba(16,24,39,.04)}
+.pt{border-collapse:collapse;table-layout:fixed;width:100%}
+.pt th,.pt td{padding:8px 3px;text-align:center;border-bottom:1px solid #eef1f6;overflow:hidden}
+.pt tr:last-child th,.pt tr:last-child td{border-bottom:0}
+.pt thead th{background:var(--navy);color:#fff;font-weight:800;font-size:12px;white-space:nowrap;text-overflow:ellipsis;letter-spacing:-.2px}
+.pt thead th.pt-k{background:#1b2a44;font-size:10px;color:#9fb2cd;letter-spacing:-.3px}
+.pt tbody th{width:28%;text-align:center;padding-left:3px;padding-right:3px;background:#f8fafc;color:#475467;font-size:12px;font-weight:800;white-space:nowrap;letter-spacing:-.3px}
+.pt td.v{font-weight:800;font-size:15px;letter-spacing:-.6px;white-space:nowrap;color:#0b2f7a}
+.pt td.v.blue{background:#e9f0ff}
+.pt td.v.mint{background:#e8f8f0;color:#0c6844}
+.pt td.d{font-size:10.5px;font-weight:800;color:#344054;white-space:nowrap;letter-spacing:-.5px;padding:8px 1px}
+.pt td.d .ago{color:#98a2b3;font-weight:700}
+.pt td.d.warn .ago{color:#b54708}
+.pt-empty{padding:22px;text-align:center;color:var(--muted);font-size:13px}
+/* ══════ 총판 통계 카드 (컬러) ══════ */
+.stat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(128px,1fr));gap:8px;margin:8px 0 4px}
+.stat-card{position:relative;background:#fff;border:1px solid var(--line);border-radius:12px;padding:11px 8px 10px;text-align:center;min-width:0;overflow:hidden}
+.stat-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;background:#cfd8e6}
+.stat-label{font-size:10.5px;color:#667085;margin-bottom:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:700}
+.stat-value{font-size:15px;font-weight:800;letter-spacing:-.6px;word-break:keep-all;line-height:1.25}
+.stat-sub{font-size:9.5px;color:#98a2b3;margin-top:4px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.stat-card.c-blue{background:linear-gradient(180deg,#fff,#f2f6ff)} .stat-card.c-blue::before{background:#2457d6} .stat-card.c-blue .stat-value{color:#1b46b8}
+.stat-card.c-green{background:linear-gradient(180deg,#fff,#f1fbf6)} .stat-card.c-green::before{background:#12a06a} .stat-card.c-green .stat-value{color:#0c6844}
+.stat-card.c-amber{background:linear-gradient(180deg,#fff,#fff9ef)} .stat-card.c-amber::before{background:#f0a020} .stat-card.c-amber .stat-value{color:#a35b00}
+.stat-card.c-rose{background:linear-gradient(180deg,#fff,#fff5f5)} .stat-card.c-rose::before{background:#d94a4a} .stat-card.c-rose .stat-value{color:#b02a2a}
+.stat-card.c-violet{background:linear-gradient(180deg,#fff,#f8f4ff)} .stat-card.c-violet::before{background:#7c4ddb} .stat-card.c-violet .stat-value{color:#5b32b0}
+.stat-card.c-teal{background:linear-gradient(180deg,#fff,#f0fbfc)} .stat-card.c-teal::before{background:#0f9aa8} .stat-card.c-teal .stat-value{color:#0a6f7a}
+.stat-card.c-slate{background:linear-gradient(180deg,#fff,#f7f9fc)} .stat-card.c-slate::before{background:#64748b} .stat-card.c-slate .stat-value{color:#334155}
+/* ══════ 월별 카드 (수량 + 금액 동시) ══════ */
+.mo-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:7px;margin:8px 0 6px}
+.mo-cell{border:1px solid #e3e9f3;border-radius:11px;padding:7px 4px 6px;background:linear-gradient(180deg,#fff,#f7f9fd);text-align:center;min-width:0;overflow:hidden}
+.mo-m{font-size:10px;font-weight:800;color:#8a94a6;letter-spacing:-.3px}
+.mo-q{margin-top:4px;border-radius:7px;padding:3px 0;background:#eaf0ff;color:#1b46b8;font-size:11px;font-weight:800;letter-spacing:-.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mo-a{margin-top:3px;border-radius:7px;padding:3px 0;background:#f2f4f8;color:#475467;font-size:9.5px;font-weight:700;letter-spacing:-.4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mo-cell.green .mo-q{background:#e8f8f0;color:#0c6844}
+.mo-cell.violet .mo-q{background:#f4eeff;color:#5b32b0}
+.mo-cell.violet .mo-a{background:#faf7ff;color:#6b5a92}
+/* ── 납품일자 입력칸 ── */
+.date-cell{border:1px solid #d0d5dd;border-radius:8px;padding:6px 8px;min-height:36px;background:#fff;font-size:12.5px;max-width:132px;width:132px}
+.date-cell:focus{outline:2px solid #c7d6ff;border-color:#7899ff}
+.date-cell.saving{border-color:#ffb020;background:#fffdf5}
+.date-cell.saved{border-color:#7ee2a8;background:#f4fff9}
+.manual-body{max-height:66vh;overflow:auto;font-size:13.5px;line-height:1.78}
+.manual-body h4{margin:16px 0 6px;color:var(--navy)}
+.manual-body li{margin:3px 0}
+.manual-body code{background:#f2f4f7;padding:1px 5px;border-radius:5px;font-size:12px}
+.manual-body .box{background:#f8fafc;border:1px solid var(--line);border-radius:9px;padding:9px 11px;margin:6px 0;font-size:12.5px;line-height:1.65}
+/* ══════ v10.0 최종: 표 가운데 정렬 · No. 최소폭 · 2줄 셀 ══════ */
+.nowrap{white-space:nowrap}
+.col-no{width:30px;min-width:26px;padding-left:2px!important;padding-right:2px!important;text-align:center;white-space:nowrap}
+/* v10.0 최종(개선): ②③④ 리스트 항목명+모든 본문 셀 가운데 정렬 (①은 기존 .pt 로 이미 가운데 · 폭 불변) */
+#shipWaitBox th,#inboundWaitBox th,#recentBox th,#shipWaitBox td,#inboundWaitBox td,#recentBox td{text-align:center}
+.c-client{line-height:1.32;white-space:pre-line;word-break:keep-all}
+/* v10.0 최종(개선2): 거래처 셀은 PC/모바일 공통 2줄 고정 — 1줄:거래처명 / 2줄:(수량/금액)
+   l1·l2 를 항상 블록+줄바꿈금지로 만들고, td(width:1%) 는 내용에 딱 맞는 최소 폭으로 자동 조절 */
+.c-client .l1,.c-client .l2{display:block;white-space:nowrap}
+#shipWaitBox td.c-client,#inboundWaitBox td.c-client,#recentBox td.c-client{width:1%;min-width:0;max-width:none;white-space:nowrap}
+.c-type{white-space:nowrap;word-break:keep-all}
+.c-type .l2::before{content:' '}
+#pwBtn{display:inline-flex;align-items:center;gap:3px}
+#pwBtn .ic2{font-size:12px;line-height:1}
+/* ── 폼 속성 순서 편집 ── */
+.order-bar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;background:#f8fafc;border:1px solid var(--line);border-radius:10px;padding:8px 10px;margin:8px 0;font-size:12px;color:#475467}
+.ftools{display:none;align-items:center;gap:4px;justify-content:flex-end}
+#editForm.editing .ftools{display:flex}
+#editForm.editing .field{outline:1px dashed #cfd8e6;outline-offset:2px;border-radius:12px;padding:6px}
+.ftools .fh{cursor:grab;color:#98a2b3;font-size:13px;line-height:1;-webkit-user-select:none;user-select:none}
+.ftools .mv{background:#eef1f6;color:#475467;padding:2px 6px;border-radius:6px;font-size:10px;line-height:1.4;min-width:22px}
+.field.dragging{opacity:.5}
+@media(max-width:760px){
+  #refreshBtn .tx{display:none}
+  #pwBtn .tx{display:none}
+}
+/* 모바일: 납품형태 2줄 (거래처 2줄 규칙은 PC 공통으로 상단에서 적용) */
+@media(max-width:700px){
+  .c-client .l2{display:block;white-space:nowrap}
+  .c-client .l2::before{content:''}
+  .c-type .l2{display:block;white-space:nowrap}
+  .c-type .l2::before{content:''}
+  .col-no{width:28px;min-width:24px}
+}
+/* ── 모바일 ── */
+@media(max-width:760px){
+  .mo-grid{grid-template-columns:repeat(4,1fr);gap:6px}
+}
+@media(max-width:700px){
+  .top{padding:11px 12px;gap:6px}
+  .brand{font-size:15px}
+  .brand-full{display:none}
+  .brand-min{display:inline}
+  #connectionLabel{font-size:10px;padding:4px 6px}
+  .top-right button{font-size:11px;padding:6px 7px}
+  #refreshBtn{padding:6px 7px;font-size:11px}
+  .wrap{margin:12px auto;padding:0 11px}
+  .panel{padding:14px 12px;border-radius:14px}
+  .form-grid{grid-template-columns:1fr}
+  .form-grid .wide{grid-column:auto}
+  .toolbar input,.toolbar select{min-width:100%}
+  .modal{padding:15px}
+  /* ★ 탭 5개 → 한 줄 3개(2줄) */
+  .tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+  .tab{padding:9px 4px;font-size:11.5px;white-space:nowrap;letter-spacing:-.4px}
+  .stat-grid{grid-template-columns:repeat(3,1fr);gap:6px}
+  .stat-card{padding:9px 4px 8px;border-radius:10px}
+  .stat-value{font-size:12.5px;letter-spacing:-.5px}
+  .stat-label{font-size:9.5px;letter-spacing:-.3px}
+  .stat-sub{font-size:9px}
+  .pt thead th{font-size:11px}
+  .pt td.v{font-size:14px}
+  .pt td.d{font-size:10px;letter-spacing:-.6px}
+  .pt tbody th{font-size:11px;padding-left:6px}
+  .mo-grid{grid-template-columns:repeat(4,1fr);gap:5px}
+  .mo-q{font-size:10.5px}
+  .mo-a{font-size:9px}
+  table{font-size:12px}
+  th,td{padding:7px 6px}
+  .date-cell{width:124px;max-width:124px}
+}
+@media(max-width:380px){
+  .pt tbody th{width:26%;font-size:10.5px;letter-spacing:-.5px;padding-left:2px;padding-right:2px}
+  .pt td.d{font-size:9.5px;letter-spacing:-.7px}
+  .pt thead th{font-size:10.5px}
+  .mo-q{font-size:10px}
+  .mo-a{font-size:8.5px}
+}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="brand"><span class="brand-full">푸로찜 거래처 · 입출고 관리</span><span class="brand-min">푸로찜 관리</span></div>
+  <div class="top-right">
+    <span id="connectionLabel">확인 중</span>
+    <button id="refreshBtn" type="button" aria-label="새로고침" title="새로고침"><span class="ic">⟳</span><span class="tx">새로고침</span></button>
+    <button class="ghost" id="pwBtn" type="button" aria-label="비밀번호 관리" title="비밀번호 관리"><span class="ic2">🔑</span><span class="tx">비밀번호</span></button>
+    <button class="ghost" id="manualBtn">매뉴얼</button>
+  </div>
+</header>
+<main class="wrap" id="appView">
+  <nav class="tabs">
+    <button class="tab active" data-tab="dashboard">입출고 현황</button>
+    <button class="tab" data-tab="stats">총판 통계</button>
+    <button class="tab" data-tab="clients">거래처 관리</button>
+    <button class="tab" data-tab="newclient">거래처 추가</button>
+    <button class="tab" data-tab="history">변경 이력</button>
+  </nav>
+
+  <section id="dashboardPanel" class="panel">
+    <!-- v10.1: 노션 데이터 새로고침 — 서버 캐시(대시보드 180초/통계 300초)를 즉시 무효화하고 최신값 재조회 -->
+    <div style="display:flex;justify-content:flex-end;margin:-4px 0 2px"><button class="ghost" id="notionRefreshBtn" type="button" title="노션 캐시를 즉시 지우고 최신 데이터를 다시 조회합니다">🔄 노션 데이터 새로고침</button></div>
+    <h3 style="margin-top:0">① 푸로찜제품별 현황</h3><div id="prodBox"></div>
+    <h3>② 배송 필요 List (출고 대기)</h3><div id="shipWaitBox"></div>
+    <h3>③ 본사납품 필요 List (입고 대기)</h3><div id="inboundWaitBox"></div>
+    <h3>④ 최근 납품 List (최근 7일)</h3><div id="recentBox"></div>
+  </section>
+
+  <section id="statsPanel" class="panel hidden">
+    <h2>푸로찜 총판 통계 현황</h2>
+    <div class="muted" id="statsBasis">집계 기준일: 납품일자</div>
+    <div id="statsBody"></div>
+    <h3>🔎 기간 검색 (납품일자 기준)</h3>
+    <div class="toolbar">
+      <input type="date" id="searchStart" aria-label="시작일">
+      <input type="date" id="searchEnd" aria-label="종료일">
+      <button class="primary" id="searchStatsBtn">조회</button>
+    </div>
+    <div id="searchStatsBox"></div>
+  </section>
+
+  <section id="clientsPanel" class="panel hidden">
+    <h2>거래처 DB 관리</h2><div class="muted">조회·수정·보관(Notion 휴지통 이동)까지 가능합니다.</div>
+    <div class="toolbar"><input id="clientsSearch" placeholder="거래처명 검색"><button class="primary" id="clientsSearchBtn">검색</button><button class="secondary" id="clientsReload">새로고침</button><button class="ghost" id="clientsAdd">신규 추가</button></div>
+    <div id="clientsTable"></div><div class="actions"><button class="ghost hidden" id="clientsMore">다음 100건 불러오기</button></div>
+  </section>
+
+  <section id="newclientPanel" class="panel hidden">
+    <h2>거래처 추가 / 휴면 거래처 재사용</h2>
+    <div class="notice warning"><b>휴면 거래처 재사용 조건</b><br>총 출고량 0 + 입출고 DB 연결 0건일 때만 서버가 재검증 후 허용합니다.</div>
+    <div class="toolbar"><button class="primary" id="newClientBtn">신규 거래처 등록</button><button class="secondary" id="dormantLoadBtn">재사용 후보 조회</button></div>
+    <div id="dormantCandidates"></div>
+  </section>
+
+  <section id="historyPanel" class="panel hidden">
+    <h2>변경 이력</h2><div class="muted" id="historySub">추가·수정·납품일자 입력·보관·복원 내역입니다. 기록 당시 값 그대로 보관됩니다.</div>
+    <div class="toolbar">
+      <input id="historyKeyword" placeholder="거래처명 / 속성 / 변경값 검색">
+      <select id="historyDb"><option value="all">전체 DB</option><option value="거래처 DB">거래처 DB</option><option value="입출고 DB">입출고 DB</option></select>
+      <select id="historyAction"><option value="">전체 작업</option><option>추가</option><option>수정</option><option>휴면 거래처 재사용</option><option>보관(삭제)</option><option>복원</option></select>
+      <button class="primary" id="historySearchBtn">조회</button>
+    </div>
+    <div id="historyTable"></div>
+    <div class="actions"><a id="auditSheetLink" href="#" target="_blank" rel="noopener" class="hidden"><button class="secondary">Google 시트 '변경 이력 Log' 열기</button></a></div>
+  </section>
+  <div class="foot">푸로찜 총판 관리시스템 v10.0 최종</div>
+</main>
+
+<div class="modal-backdrop hidden" id="editModal"><div class="modal"><div class="modal-head"><div><h2 id="modalTitle">정보 수정</h2><div class="muted" id="modalSub"></div></div><div style="display:flex;gap:6px;flex-shrink:0"><button class="ghost" id="orderToggle" type="button">순서 편집</button><button class="modal-close" id="modalClose">닫기 ✕</button></div></div><div id="modalNotice"></div><div class="order-bar hidden" id="orderBar"><span>⠿ 를 끌어다 놓거나 ▲▼ 로 순서를 바꾼 뒤 <b>"순서 편집 끝내기"에서 최종 확인(Yes)</b>해야 이 브라우저에 저장·적용됩니다.</span><button type="button" class="secondary" id="orderReset">기본 순서로</button></div><div id="editForm" class="form-grid"></div><div class="actions"><button class="secondary" id="modalCancel">취소</button><button class="primary" id="modalSave">저장 및 이력 기록</button></div></div></div>
+
+<div class="modal-backdrop hidden" id="deleteModal"><div class="modal" style="max-width:430px"><div class="modal-head"><div><h2>정보 삭제</h2><div class="muted" id="delSub"></div></div><button class="modal-close" id="delClose">닫기 ✕</button></div><div class="notice error" style="margin-top:10px"><b>정말 삭제할까요?</b><br>노션 "푸로찜 입출고 DB"의 해당 페이지가 휴지통으로 이동됩니다. 삭제 기록은 변경 이력에 자동 남습니다.</div><div class="field" style="margin-top:12px"><label>비밀번호</label><input type="password" id="delPw" autocomplete="off" placeholder="삭제 확인 비밀번호 입력"><small>상단 🔑 비밀번호 버튼에서 언제든 바꿀 수 있습니다.</small></div><div class="actions" style="display:flex;gap:8px;justify-content:center"><button class="secondary" id="delNo">No (취소)</button><button class="danger-solid" id="delYes">Yes (삭제)</button></div></div></div>
+
+<div class="modal-backdrop hidden" id="pwModal"><div class="modal" style="max-width:430px"><div class="modal-head"><div><h2>비밀번호 관리</h2><div class="muted">삭제할 때 쓰는 비밀번호입니다. 서버(Google Apps Script 속성)에만 저장되며 코드·화면에는 남지 않습니다.</div></div><button class="modal-close" id="pwClose">닫기 ✕</button></div>
+<div class="field" style="margin-top:12px"><label>현재 비밀번호</label><input type="password" id="pwCur" autocomplete="current-password" placeholder="현재 비밀번호"></div>
+<div class="field" style="margin-top:10px"><label>새 비밀번호</label><input type="password" id="pwNew" autocomplete="new-password" placeholder="4자 이상"></div>
+<div class="field" style="margin-top:10px"><label>새 비밀번호 확인</label><input type="password" id="pwNew2" autocomplete="new-password" placeholder="새 비밀번호 다시 입력"></div>
+<div class="notice" style="margin-top:12px">변경한 비밀번호는 <b>재배포도, 코드 수정도 필요 없이</b> 다음 삭제부터 바로 적용됩니다.</div>
+<div id="pwNotice"></div>
+<div class="actions" style="display:flex;gap:8px;justify-content:center"><button class="secondary" id="pwCancel">취소</button><button class="primary" id="pwSave">비밀번호 변경</button></div></div></div>
+
+<div class="modal-backdrop hidden" id="manualModal"><div class="modal"><div class="modal-head"><div><h2>사용 매뉴얼 (v10.0 최종)</h2><div class="muted">처음 보는 사람도 바로 따라 할 수 있는 사용법</div></div><button class="modal-close" id="manualClose">닫기 ✕</button></div>
+<div class="manual-body">
+<div class="box" style="background:#eaf0ff;border-color:#c7d6ff"><b>한 줄 요약</b> : 이 앱은 <b>노션에 있는 3개 DB(거래처·입출고·제품)를 휴대폰/PC에서 바로 보고 고치는 도구</b>입니다. 모든 변경은 자동으로 구글시트 "변경 이력 Log"에 기록됩니다.</div>
+
+<h4>🏠 화면 위쪽 버튼</h4>
+<li><b>연결됨 / 연결 끊김</b> : 노션과 연결되었는지 알려주는 신호등. <b>연결됨</b>이면 정상이에요.</li>
+<li><b>⟳ 새로고침</b> : 지금 보고 있는 화면의 숫자를 노션에서 <b>새로 받아와</b> 다시 보여줍니다.</li>
+<li><b>🔑 비밀번호</b> : 삭제할 때 쓰는 비밀번호를 이 화면에서 바로 바꿀 수 있어요. (재배포 불필요)</li>
+<li><b>매뉴얼</b> : 지금 보고 있는 이 설명서예요.</li>
+
+<h4>📋 입출고 현황 탭 (맨 처음 화면)</h4>
+<li><b>① 푸로찜제품별 현황</b> : 표 1장으로 제품(12/15/20 KG) 재고를 한눈에 봅니다.
+<div class="box">· <b>현재 재고량</b>(파란 음영) = 창고에 실제 있는 양<br>· <b>예정 재고량</b>(초록 음영) = 앞으로의 납품까지 반영한 양<br>· <b>마지막 입고</b> = 마지막으로 창고에 들어온 날. <code>26-11-16 (2일)</code>처럼 며칠 지났는지도 알려주고, 30일이 넘으면 주황색이 됩니다.</div></li>
+<li><b>② 배송 필요 List (출고 대기)</b> : 손님에게 보내야 하는 것들. <b>③ 본사납품 필요 List (입고 대기)</b> : 본사에서 받아야 하는 것들.
+<div class="box">· <b>날짜 옆 (월)(화)(수)…</b> : 납품요청일의 요일이 한 글자로 표시됩니다.
+· <b>오늘이 납품요청일인 행</b>은 <b>거래처와 납품형태가 파란 음영</b>으로 표시되어 한눈에 구분됩니다.
+· <b>납품일자 칸</b>을 눌러 달력에서 날짜를 고르면 <b>저장 버튼 없이 바로 노션에 저장</b>됩니다. (저장 중 주황 테두리 → 성공하면 초록 테두리)</div></li>
+<li><b>④ 최근 납품 List</b> : 최근 7일 동안의 납품 기록입니다.</li>
+<li><b>수정 / 삭제 버튼</b> : 각 행마다 있습니다.
+<div class="box">· <b>수정(파란 버튼)</b> : 그 행의 모든 정보를 고칠 수 있어요. 고친 뒤 "저장 및 이력 기록"을 누르면 됩니다.
+· <b>삭제(빨간 버튼)</b> : 그 행의 정보를 노션에서 지웁니다. <b>①비밀번호 입력 → ②"정말 삭제할까요?" Yes 선택</b>이라는 2단계 확인이 있어서 실수로 눌러도 안 지워집니다. 지운 페이지는 노션 휴지통에 남아 복구할 수 있고, 삭제 기록도 변경 이력에 남습니다.</div></li>
+
+<h4>📊 총판 통계 탭</h4>
+<li>모든 통계는 <b>납품일자</b>가 있는 기록만, 그 날짜 기준으로 계산합니다.</li>
+<li><b>총 미수금</b> : 상태에 "미수"가 있는 건들의 판매금 합계.</li>
+<li><b>올해 평균 Profit</b> : 올해 <b>출고 Profit을 전부 더한 값 ÷ 지금까지 지난 달 수</b>. (예: 10월이면 ÷10) 소수점은 버립니다.</li>
+<li><b>올해 총 입금액</b> : 올해 받은 돈(Σ입고액)의 총합.</li>
+<li><b>작년 실적 3개 카드</b> : ① 입고량/입고액 ② 출고량/판매금 ③ Profit — 각각 <b>총합</b>과 <b>12으로 나눈 월 평균</b>이 같이 나옵니다.</li>
+<li><b>택배비 카드</b> : 당월·전월·올해 총 택배비.</li>
+<li><b>월별 카드 3줄</b> : 1월~12월을 판매·입고·Profit으로 각각 보여줍니다. 위 칸은 수량, 아래 칸은 금액이에요.</li>
+<li><b>기간 검색</b> : 시작일~종료일을 고르고 "조회"를 누르면 그 기간 동안의 실적 합계가 나옵니다.</li>
+
+<h4>🏪 거래처 관리 / 거래처 추가 탭</h4>
+<li><b>거래처 관리</b> : 거래처 목록을 검색하고 <b>수정</b>(정보 변경)·<b>보관</b>(노션 휴지통 이동)을 할 수 있습니다.</li>
+<li>주소 칸의 <b>다음 주소 검색</b> 버튼으로 도로명·지번주소를 한 번에 넣을 수 있어요.</li>
+<li>수정 창의 <b>순서 편집</b> : 속성을 끌어다 놓거나 ▲▼ 로 순서를 바꿀 수 있어요. <b>기본 순서로</b>를 누르면 처음 배치로 돌아갑니다.</li>
+<li><b>거래처 추가</b> : 새 거래처를 만들거나, 오래 쓰지 않은 <b>휴면 거래처를 재사용</b>할 수 있습니다. (출고 기록이 0건인 거래처만, 저장할 때 서버가 다시 확인합니다)</li>
+
+<h4>🕘 변경 이력 탭</h4>
+<li>누가·언제·무엇을 바꿨는지 전부 기록됩니다. 검색과 필터로 찾을 수 있어요.</li>
+<li>보관(삭제)한 페이지는 <b>복원</b> 버튼으로 되살릴 수 있습니다.</li>
+<li>아래 버튼을 누르면 구글시트 "변경 이력 Log"가 새 창에서 열립니다.</li>
+
+<h4>⚠️ 딱 두 가지만 기억하기</h4>
+<li>노션에서 <b>자동 계산되는 값(수식·롤업)</b>은 이 앱에서 바꿀 수 없습니다.</li>
+<li>방금 고친 값이 화면에 바로 안 보이면 <b>⟳ 새로고침</b>을 눌러주세요. (통계는 1~2분 캐시를 사용합니다)</li>
+</div></div></div>
+
+<div id="toast" style="position:fixed;bottom:18px;left:50%;transform:translateX(-50%);z-index:120;max-width:92vw;background:#172033;color:#fff;padding:12px 16px;border-radius:12px;box-shadow:var(--shadow);display:none;font-size:13px"></div>
+
+<script>
+const GAS_URL='https://script.google.com/macros/s/AKfycbxM5OHgyvQ8e9HzMXRfEBsVjbUo-rtNDTMWnK10BMrwgWjVX2Yfh2asEbfau3RkXoejNg/exec';
+let INIT=null,STATS=null,DASH=null;
+let currentTab='dashboard',currentEdit=null;
+let listState={clients:{cursor:null,search:''}};
+let activeSchema=[],activeRelationOptions={},isNewClient=false,initialFormValues={};
+
+const $=id=>document.getElementById(id);
+function toast(msg,ms){ms=ms||3200;const t=$('toast');t.textContent=msg;t.style.display='block';clearTimeout(window.__toastTimer);window.__toastTimer=setTimeout(function(){t.style.display='none';},ms);}
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c];});}
+/* v10.0 최종(개선): 대시보드 마지막 성공 화면 로컬 캐시 — 표시 전용(로직/데이터 불변),
+   항상 그 직후 최신 조회 결과로 조용히 덮어써서 "노션 조회 중" 대기를 없앰 */
+function cacheDashSave_(d){try{localStorage.setItem('prozyme_dash_cache_v10d',JSON.stringify(d));}catch(_){}}
+function cacheDashLoad_(){try{const r=localStorage.getItem('prozyme_dash_cache_v10d');if(!r)return null;const d=JSON.parse(r);return (d&&d.products&&d.shipWait)?d:null;}catch(_){return null;}}
+async function api(action,payload){
+  payload=payload||{};
+  const res=await fetch(GAS_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(Object.assign({action:action},payload))});
+  const raw=await res.text();
+  let data;
+  try{data=JSON.parse(raw);}catch(e){throw new Error('GAS 응답을 해석할 수 없습니다. 배포 주소와 액세스 권한을 확인해주세요. '+raw.slice(0,150));}
+  if(data.status!=='success')throw new Error(data.message||'요청에 실패했습니다.');
+  return data.data;
+}
+function setBusy(el,busy){if(!el)return;el.disabled=busy;if(busy){el.dataset.old=el.textContent;el.innerHTML='<span class="spinner"></span> 처리 중';}else el.textContent=el.dataset.old||el.textContent;}
+function check_(v){return v?'<span class="pill ok">✔</span>':'<span class="pill no">✖</span>';}
+function num_(v){if(v===''||v==null)return null;if(typeof v==='number')return v;const n=Number(String(v).replace(/[,\s원₩]/g,''));return isFinite(n)?n:null;}
+function fmtN_(v){if(v===''||v==null)return '—';if(typeof v==='number')return v.toLocaleString('ko-KR');return String(v);}
+function fmtK_(v){const n=num_(v);if(n===null)return '—';return Math.round(n).toLocaleString('ko-KR');}
+function ioPill_(kind,title){if(kind==='out')return '<span class="pill io out">출고</span>';if(kind==='in')return '<span class="pill io">입고</span>';return '<span class="pill io no">'+esc(title||'—')+'</span>';}
+/* v10.0: 오늘 날짜(Asia/Seoul 기준) */
+function todayKST_(){return new Date(Date.now()+9*3600*1000).toISOString().slice(0,10);}
+function isToday_(d){return !!d&&d===todayKST_();}
+/* v10.0 최종: MM/DD(요일) — ②③ 리스트의 납품요청일 표기와 동일 형식 (표시 전용) */
+function mdDow_(d){
+  const s=String(d||'').slice(0,10);
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(s))return s||'—';
+  const dt=new Date(s+'T00:00:00Z');
+  if(isNaN(dt.getTime()))return s;
+  return s.slice(5,7)+'/'+s.slice(8,10)+'('+['일','월','화','수','목','금','토'][dt.getUTCDay()]+')';
+}
+/* v10.0 최종(개선4): 거래처명/상세 분리 규칙 — ★거래처명 안에 괄호가 있어도 '마지막 괄호'만 2줄로★
+   · 규칙: 문자열 뒤에서부터 마지막 "(" 앞까지 = 1줄(거래처명) / 그 "("부터 끝까지 = 2줄(수량·금액)
+     "우리상사 (계룡시) (20개/9,999,000원)" → 1줄 "우리상사 (계룡시)" / 2줄 "(20개/9,999,000원)"
+     "수창 (15개/2,625,000원)"              → 1줄 "수창" / 2줄 "(15개/2,625,000원)"
+   · ③ 형태 "현대바이오랜드 3개/업체명" → 1줄 "현대바이오랜드" / 2줄 "3개/업체명" (기존 호환)
+   · 과거 쉼표 형태 "OO상사, 2개/100,000원" 도 호환 (숫자 안 콤마는 분리 지점이 아님)
+   ※ 정규식은 1회만 컴파일해 재사용(매 행 재컴파일 없음) — 속도 개선 */
+var RE_TAIL_PAREN_=/\s*(\([^()]*\))\s*$/;   /* 끝에 붙은 '마지막 괄호 덩어리' 한 개 */
+var RE_QTY_SPLIT_=/\s(?=\d+\s*개\s*\/)/;     /* "이름 3개/업체명" 형태 */
+var RE_COMMA_SPLIT_=/,\s/;                    /* "이름, 2개/100,000원" 형태 */
+function clientParts_(v){
+  var raw=String(v==null?'':v).trim();
+  if(!raw)return ['',''];
+  var nm=function(x){return x.replace(/\s+/g,' ').trim().replace(/[,、]+$/,'').trim();};
+  /* 1순위: 뒤에서 마지막 '(' ~ 마지막 ')' (거래처명 속 괄호는 1줄에 그대로 남는다) */
+  var m=raw.match(RE_TAIL_PAREN_);
+  if(m&&m.index>0){
+    var nme=nm(raw.slice(0,m.index));
+    if(nme)return [nme, m[1]];
+  }
+  var mi=raw.search(RE_QTY_SPLIT_);
+  if(mi>0)return [nm(raw.slice(0,mi)), raw.slice(mi+1).trim()];
+  var ci=raw.search(RE_COMMA_SPLIT_);
+  if(ci>0)return [nm(raw.slice(0,ci)), raw.slice(ci+1).trim()];
+  return [nm(raw),''];
+}
+/* v10.0 최종(개선4): 수량·금액 3자리 콤마 보정 (표시 전용 — 원본 값은 변경 없음)
+   · toLocaleString('ko-KR') 의존 제거 → 어떤 WebView/브라우저에서도 결과가 100% 동일
+     (일부 모바일 WebView 는 Intl 데이터가 없어 콤마 없이 반환 → "9,999,000" 이 "9999000" 으로 보이던 원인)
+   · 숫자에 콤마가 있든 없든, 콤마 뒤에 공백이 있든 없든 항상 3자리 콤마로 표기 */
+var RE_QTY_AMT_=/^([\d,\s]+)\s*개\s*\/\s*([\d,\s]+)\s*원\s*$/;
+var RE_GAE_=/(\d[\d,\s]*)\s*개/g;
+var RE_WON_=/(\d[\d,\s]*)\s*원/g;
+/* 3자리 콤마 전용 포매터 — 문자열 조작만 사용(부동소수점·Intl 미사용) → 정확·초고속·전 기기 동일 */
+function grp3_(x){
+  var d=String(x==null?'':x).replace(/[^\d]/g,'');
+  if(!d)return '';
+  d=d.replace(/^0+(?=\d)/,'');
+  return d.replace(/\B(?=(\d{3})+(?!\d))/g,',');
+}
+function amtComma_(s){
+  var t=String(s==null?'':s).trim();
+  if(!t)return '';
+  var wrap=t.charAt(0)==='('&&t.charAt(t.length-1)===')';
+  if(wrap)t=t.slice(1,-1).trim();
+  var m=t.match(RE_QTY_AMT_);
+  if(m){
+    t=grp3_(m[1])+'개/'+grp3_(m[2])+'원';
+  }else{
+    t=t.replace(RE_GAE_,function(_,n){return grp3_(n)+'개';});
+    t=t.replace(RE_WON_,function(_,n){return grp3_(n)+'원';});
+  }
+  return wrap?'('+t+')':t;
+}
+/* v10.0 최종(개선4): 같은 거래처 문자열은 1회만 계산(메모) — 행이 수백 개여도 파싱 반복 없음
+   · clientParts_/amtComma_ 는 입력만으로 결과가 정해지는 순수 함수 → 메모해도 결과 100% 동일
+   · 500개 초과 시 캐시 자동 비움(메모리 상한 고정) */
+var __ccCache__=Object.create(null),__ccCount__=0;
+function clientCell_(v){
+  var key=String(v==null?'':v);
+  var hit=__ccCache__[key];
+  if(hit!==undefined)return hit;
+  var out;
+  var p=clientParts_(key);
+  if(!p[0]&&!p[1])out='—';
+  else if(!p[0]||!p[1])out=esc(p[0]||p[1]);
+  else out='<span class="l1">'+esc(p[0])+'</span><span class="l2">'+esc(amtComma_(p[1]))+'</span>';
+  if(__ccCount__>500){__ccCache__=Object.create(null);__ccCount__=0;}
+  __ccCache__[key]=out;__ccCount__++;
+  return out;
+}
+/* v10.0 최종: 납품형태 셀 — "본사 …" 는 PC 한 줄 / 모바일 "본사" ↵ 나머지 */
+/* v10.0 최종(개선): "본사 발송" 등 짧은 값(나머지 2글자 이하)은 모바일에서도 한 줄 유지,
+   "본사 제2배송처" 처럼 긴 값만 본사 ↵ 나머지 2줄 분리 */
+function typeCell_(v){
+  const s=String(v==null?'':v).trim();
+  if(!s)return '—';
+  const m=s.match(/^본사\s*(\S[\s\S]*)$/);
+  const rest=m?String(m[1]).trim():'';
+  if(rest&&rest.length>2)return '<span class="l1">본사</span><span class="l2">'+esc(rest)+'</span>';
+  return esc(s);
+}
+/* v10.0: 요일을 한글 한 글자로 통일 — "10/26(월)"·"10/26(Mon)" → "10/26(월)" (연동 리스크 없음, 표시 전용) */
+function krDow_(label){
+  const s=String(label||'');
+  if(!s)return s;
+  const m=s.match(/^(\d{2}\/\d{2})\s*\(([^)]+)\)$/);
+  if(!m)return s;
+  const kr=['일','월','화','수','목','금','토'];
+  const en={sun:0,mon:1,tue:2,wed:3,thu:4,fri:5,sat:6};
+  const w=m[2].toLowerCase();
+  if(w in en)return m[1]+'('+kr[en[w]]+')';
+  if(kr.indexOf(m[2])>=0)return m[1]+'('+m[2]+')';
+  return m[1]+'('+m[2].charAt(0)+')';
+}
+/* v10.0: 관리 버튼 — 수정(파랑) + 삭제(빨강) */
+function manageBtns_(id){return '<div class="row-actions"><button class="primary" data-edit2="'+esc(id)+'">수정</button><button class="danger-solid" data-del="'+esc(id)+'">삭제</button></div>';}
+function bindManageBtns_(target){
+  target.querySelectorAll('[data-edit2]').forEach(function(b){b.addEventListener('click',function(){openEdit('inouts',b.dataset.edit2);});});
+  target.querySelectorAll('[data-del]').forEach(function(b){b.addEventListener('click',function(){openDelete(b.dataset.del);});});
+}
+function yy_(y){return String(y).slice(2);}
+function switchTab(tab){
+  currentTab=tab;
+  document.querySelectorAll('.tab').forEach(function(b){b.classList.toggle('active',b.dataset.tab===tab);});
+  ['dashboard','stats','clients','newclient','history'].forEach(function(x){$(x+'Panel').classList.toggle('hidden',x!==tab);});
+  if(tab==='dashboard')loadDashboard();else if(tab==='stats')loadStats();else if(tab==='history')loadHistory();else if(tab==='newclient')$('dormantCandidates').innerHTML='';
+}
+/* ── 부팅: 실제 연결 점검 후 "연결됨 / 연결 끊김" ── */
+async function boot(){
+  const lb=$('connectionLabel');
+  lb.className='';lb.textContent='확인 중';
+  try{
+    /* v10.0 최종(개선) 속도개선: 캐시된 최근 대시보드를 먼저 즉시 렌더(표시 전용) 후 최신 데이터로 갱신 */
+    const cached=cacheDashLoad_();
+    if(cached){DASH=cached;renderDashboard(DASH);}
+    const r=await api('bootstrap',{});
+    INIT=r.initial||null;
+    lb.className='on';lb.textContent='연결됨';
+    if(r.dashboard){DASH=r.dashboard;renderDashboard(DASH);cacheDashSave_(DASH);}
+    /* v10.1 [F2]: bootstrap 이 대시보드를 이미 내려준 경우 중복 조회 생략(부팅 Notion 조회 1회 절감).
+       실패(dashboard null) 시에만 기존처럼 재시도 */
+    else loadDashboard().catch(function(e){console.warn('대시보드 로드 지연 실패:',e);});
+    if(r.dashboardError)toast('대시보드 갱신 실패(기존 화면 유지): '+r.dashboardError,5500);
+    /* 거래처 목록은 화면을 막지 않고 뒤에서 채운다(기존과 동일 데이터/동일 시점) */
+    loadList('clients',true).catch(function(){});
+  }catch(e){
+    if(String((e&&e.message)||'').indexOf('알 수 없는 action')<0){
+      lb.className='off';lb.textContent='연결 끊김';
+      toast('Notion 연결에 실패했습니다: '+e.message,7000);
+      return;
+    }
+    /* ── 폴백: 구버전 GAS 배포용 (기존 부팅 순서 그대로) ── */
+    try{
+      await api('health',{});
+      INIT=await api('initial',{});
+      lb.className='on';lb.textContent='연결됨';
+      loadDashboard().catch(function(err){console.warn('대시보드 로드 지연 실패:',err);});
+      loadList('clients',true).catch(function(){});
+    }catch(e2){
+      lb.className='off';lb.textContent='연결 끊김';
+      toast('Notion 연결에 실패했습니다: '+e2.message,7000);
+    }
+  }
+}
+/* ══════════════════════════════════════════════════════════
+   ① 제품별 현황 — 3장 카드 → 표 1장 (모바일 폭 안에서 3열 유지)
+   표 구조: 가로줄=항목 / 세로칸=제품
+   ══════════════════════════════════════════════════════════ */
+function shortProductName_(name){
+  const s=String(name||'').trim();
+  if(!s)return '(제품 없음)';
+  const t=s.replace(/푸로찜/g,'').replace(/\s+/g,' ').trim();
+  return t||s;
+}
+function ymdShort_(d){
+  const s=String(d||'').slice(0,10);
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(s))return s||'—';
+  return s.slice(2);            /* 2026-11-16 → 26-11-16 */
+}
+function renderProducts(rows){
+  const box=$('prodBox');
+  rows=rows||[];
+  if(!rows.length){box.innerHTML='<div class="pt-wrap"><div class="pt-empty">제품 정보가 없습니다.</div></div>';return;}
+  let h='<div class="pt-wrap"><table class="pt"><thead><tr><th class="pt-k">항목</th>';
+  rows.forEach(function(p){
+    h+='<th title="'+esc(p.name||'')+'">'+esc(shortProductName_(p.name))+'</th>';
+  });
+  h+='</tr></thead><tbody>';
+  /* 1줄: 현재 재고량 (파란 음영) */
+  h+='<tr><th>현재 재고량</th>';
+  rows.forEach(function(p){h+='<td class="v blue">'+esc(fmtK_(p.stock))+'</td>';});
+  h+='</tr>';
+  /* 2줄: 예정 재고량 (초록 음영) */
+  h+='<tr><th>예정 재고량</th>';
+  rows.forEach(function(p){h+='<td class="v mint">'+esc(fmtK_(p.stockPlan))+'</td>';});
+  h+='</tr>';
+  /* 3줄: 마지막 입고 — "26-11-16 (2일)" 한 줄 */
+  h+='<tr><th>마지막 입고</th>';
+  rows.forEach(function(p){
+    if(!p.lastInbound){h+='<td class="d warn"><span class="ago">기록 없음</span></td>';return;}
+    const days=(p.days===null||p.days===undefined)?null:Number(p.days);
+    let ago='';
+    if(days!==null&&isFinite(days)){
+      const n=days<0?0:days;
+      ago=' <span class="ago">('+n.toLocaleString('ko-KR')+'일)</span>';
+    }
+    h+='<td class="d'+(days!==null&&days>=30?' warn':'')+'">'+esc(ymdShort_(p.lastInbound))+ago+'</td>';
+  });
+  h+='</tr></tbody></table></div>';
+  box.innerHTML=h;
+}
+/* ── 납품일자 캘린더 → 노션 즉시 반영 ── */
+function bindDateInputs(target){
+  target.querySelectorAll('.date-cell').forEach(function(inp){
+    inp.addEventListener('change',async function(){
+      const v=inp.value,prev=inp.dataset.prev||'';
+      if(v===prev){return;}
+      inp.classList.remove('saved');inp.classList.add('saving');inp.disabled=true;
+      try{
+        const r=await api('saveDeliveryDate',{pageId:inp.dataset.pageId,date:v});
+        inp.dataset.prev=v;
+        inp.classList.remove('saving');inp.classList.add('saved');
+        setTimeout(function(){inp.classList.remove('saved');},2500);
+        toast(r.message||'납품일자를 저장했습니다.');
+      }catch(err){
+        inp.value=prev;
+        inp.classList.remove('saving');
+        toast('저장 실패: '+err.message,5500);
+      }finally{inp.disabled=false;}
+    });
+  });
+}
+function dateInput_(r){
+  return '<input type="date" class="date-cell" data-page-id="'+esc(r.id)+'" data-prev="'+esc(r.date||'')+'" value="'+esc(r.date||'')+'">';
+}
+/* ── ② 배송 필요 List (출고 대기) ── */
+function renderShipWait(rows){
+  const t=$('shipWaitBox');
+  rows=rows||[];
+  if(!rows.length){t.innerHTML='<div class="empty">배송 필요(출고 대기) 항목이 없습니다.</div>';return;}
+  t.innerHTML='<div class="table-wrap"><table><thead><tr><th class="col-no">No.</th><th>거래처</th><th>납품형태</th><th>납품요청일</th><th>납품일자</th><th>주소</th><th>명세표발행</th><th>발송대기</th><th>관리</th></tr></thead><tbody>'+
+    rows.map(function(r,i){
+      const tdC=isToday_(r.request)?' today-td':'';
+      return '<tr><td class="col-no">'+(i+1)+'</td><td class="c-client pre'+tdC+'">'+clientCell_(r.client||r.title)+'</td><td class="c-type'+tdC+'">'+typeCell_(r.type)+'</td>'+
+        '<td class="nowrap">'+esc(krDow_(r.requestLabel)||'—')+'</td><td>'+dateInput_(r)+'</td>'+
+        '<td class="pre">'+esc(r.address||'—')+'</td><td>'+check_(r.spec)+'</td><td>'+check_(r.sendWait)+'</td>'+
+        '<td>'+manageBtns_(r.id)+'</td></tr>';
+    }).join('')+'</tbody></table></div>';
+  bindDateInputs(t);
+  bindManageBtns_(t);
+}
+/* ── ③ 본사납품 필요 List (입고 대기) ── */
+function renderInboundWait(rows){
+  const t=$('inboundWaitBox');
+  rows=rows||[];
+  if(!rows.length){t.innerHTML='<div class="empty">본사납품 필요(입고 대기) 항목이 없습니다.</div>';return;}
+  t.innerHTML='<div class="table-wrap"><table><thead><tr><th class="col-no">No.</th><th>거래처</th><th>납품형태</th><th>납품요청일</th><th>납품일자</th><th>발주서발송</th><th>발주서 번호</th><th>관리</th></tr></thead><tbody>'+
+    rows.map(function(r,i){
+      const tdC=isToday_(r.request)?' today-td':'';
+      return '<tr><td class="col-no">'+(i+1)+'</td><td class="c-client pre'+tdC+'">'+clientCell_(r.client||r.title)+'</td><td class="c-type'+tdC+'">'+typeCell_(r.type)+'</td>'+
+        '<td class="nowrap">'+esc(krDow_(r.requestLabel)||'—')+'</td><td>'+dateInput_(r)+'</td>'+
+        '<td>'+check_(r.poSent)+'</td><td>'+esc(r.poNo||'—')+'</td>'+
+        '<td>'+manageBtns_(r.id)+'</td></tr>';
+    }).join('')+'</tbody></table></div>';
+  bindDateInputs(t);
+  bindManageBtns_(t);
+}
+/* ── ④ 최근 납품 List ── */
+function renderRecent(rows){
+  const t=$('recentBox');
+  rows=rows||[];
+  if(!rows.length){t.innerHTML='<div class="empty">최근 7일 동안 납품 기록이 없습니다.</div>';return;}
+  t.innerHTML='<div class="table-wrap"><table><thead><tr><th class="col-no">No.</th><th>입출고</th><th>거래처</th><th>박스히어로</th><th>명세표 발송</th><th>납품일자</th><th>입금일자</th><th>상태</th><th>택배비</th><th>관리</th></tr></thead><tbody>'+
+    rows.map(function(r,i){
+      return '<tr><td class="col-no">'+(i+1)+'</td><td>'+ioPill_(r.kind,r.title)+'</td><td class="c-client pre">'+clientCell_(r.client||r.title||'—')+'</td>'+
+        '<td>'+check_(r.boxhero)+'</td><td>'+check_(r.specSend)+'</td>'+
+        '<td class="nowrap">'+esc(mdDow_(r.date))+'</td><td class="nowrap">'+esc(mdDow_(r.payDate))+'</td>'+
+        '<td>'+esc(r.status||'—')+'</td><td>'+esc(fmtN_(r.courier))+'</td>'+
+        '<td>'+manageBtns_(r.id)+'</td></tr>';
+    }).join('')+'</tbody></table></div>';
+  bindManageBtns_(t);
+}
+/* v10.0 최종(개선2): 화면을 그리는 '모든 시점'(켜자마자 임시보관 화면 포함)에
+   예정 재고량을 항상 최종 계산식 [현재 재고 − 출고대기 합계 + 입고대기 합계] 로 다시 계산해서 그림 (표시 전용)
+   → 앱을 켜자마자 잠깐 다른 숫자가 보였다 바뀌던 현상 제거. 서버 호출 추가 없음(속도 동일). */
+function specNumClient_(name){
+  const s=String(name||'');
+  const m=s.match(/(\d+(?:\.\d+)?)\s*(?:kg|KG|Kg|킬로|키로)/);
+  if(m)return Number(m[1]);
+  const m2=s.match(/(\d+(?:\.\d+)?)/);
+  return m2?Number(m2[1]):9999;
+}
+function replan_(d){
+  try{
+    if(!d||!d.products)return d;
+    const pend={};
+    (d.shipWait||[]).forEach(function(r){
+      if(!r||!r.specKubun)return;const k=specNumClient_(r.specKubun);if(k===9999)return;
+      if(!pend[k])pend[k]={out:0,inc:0};
+      pend[k].out+=(r.outQty!==null&&r.outQty!==undefined?r.outQty:(r.qty||0));
+    });
+    (d.inboundWait||[]).forEach(function(r){
+      if(!r||!r.specKubun)return;const k=specNumClient_(r.specKubun);if(k===9999)return;
+      if(!pend[k])pend[k]={out:0,inc:0};
+      pend[k].inc+=(r.inQty!==null&&r.inQty!==undefined?r.inQty:(r.qty||0));
+    });
+    (d.products||[]).forEach(function(p){
+      const k=specNumClient_(p.name);
+      const stock=(p.stock===null||p.stock===undefined||p.stock==='')?null:Number(p.stock);
+      if(pend[k]&&stock!==null&&isFinite(stock)){
+        const plan=stock-(pend[k].out||0)+(pend[k].inc||0);
+        if(isFinite(plan))p.stockPlan=plan;
+      }
+    });
+  }catch(_){}
+  return d;
+}
+function renderDashboard(d){
+  const x=replan_(d||DASH);
+  if(!x)return;
+  renderProducts(x.products);renderShipWait(x.shipWait);renderInboundWait(x.inboundWait);renderRecent(x.recent);
+}
+/* ══════ v10.1: 노션 데이터 새로고침 — 입출고 현황 탭 전용 버튼
+   · 서버(force:true) + 클라이언트(localStorage) 캐시를 한 번에 무효화하고 최신값 재조회
+   · 로딩 속도 로직(캐시 즉시 렌더 등)은 그대로 — 이 버튼을 누를 때만 강제 갱신
+   · 총판 통계 탭의 캐시(300초)도 함께 무효화 → 화면을 막지 않고 뒤에서 선반영 */
+async function notionDataRefresh(){
+  const btn=$('notionRefreshBtn');
+  if(btn.disabled)return;
+  setBusy(btn,true);
+  try{
+    if(currentTab==='dashboard')await loadDashboard(true);
+    else if(currentTab==='stats')await loadStats(true);
+    loadStats(true).catch(function(){});   // 통계 캐시 선갱신 (화면 대기 없음)
+    toast('노션 데이터를 최신 값으로 새로고침했습니다.');
+  }catch(e){toast('새로고침 실패: '+e.message,5500);}
+  finally{setBusy(btn,false);}
+}
+$('notionRefreshBtn').addEventListener('click',notionDataRefresh);
+async function loadDashboard(force){
+  const boxes=['prodBox','shipWaitBox','inboundWaitBox','recentBox'];
+  /* v10.0 최종(개선): 최근 성공 화면을 로컬 캐시에서 즉시 렌더(표시 전용) → "노션 조회 중" 대기 소멸.
+     이후 항상 최신 조회 결과로 조용히 덮어쓰므로 데이터 신선도·로직은 기존과 100% 동일. */
+  if(!DASH){
+    const c=cacheDashLoad_();
+    if(c){DASH=c;renderDashboard(DASH);}
+    else boxes.forEach(function(b){$(b).innerHTML='<div class="empty"><span class="spinner"></span> 노션 조회 중</div>';});
+  }
+  try{
+    DASH=await api('getDashboard',force?{force:true}:{});
+    renderDashboard(DASH);
+    cacheDashSave_(DASH);
+  }catch(e){
+    if(!DASH)boxes.forEach(function(b){$(b).innerHTML='<div class="notice error">'+esc(e.message)+'</div>';});
+    else toast('갱신 실패(기존 화면 유지): '+e.message,5500);
+  }
+}
+/* ══════════════════════════════════════════════════════════
+   총판 통계 — 컬러 카드 + 월별 3카드(수량+금액)
+   ══════════════════════════════════════════════════════════ */
+function statCard_(label,val,cls,sub){
+  return '<div class="stat-card '+(cls||'c-slate')+'"><div class="stat-label">'+esc(label)+'</div><div class="stat-value">'+val+(sub?'<div class="stat-sub">'+esc(sub)+'</div>':'')+'</div></div>';
+}
+function monthCards_(title,arrA,unitA,arrB,unitB,cls){
+  let h='<h3>'+esc(title)+'</h3><div class="mo-grid">';
+  for(let i=0;i<12;i++){
+    const a=fmtK_(arrA?arrA[i]:0)+(unitA||'');
+    const b=fmtK_(arrB?arrB[i]:0)+(unitB||'');
+    const second=arrB?'<div class="mo-a">'+esc(b)+'</div>':'';
+    h+='<div class="mo-cell '+(cls||'')+'"><div class="mo-m">'+(i+1)+'월</div>'+
+       '<div class="mo-q">'+esc(a)+'</div>'+second+'</div>';
+  }
+  return h+'</div>';
+}
+async function loadStats(force){
+  const box=$('statsBody');box.innerHTML='<div class="empty"><span class="spinner"></span> 통계 집계 중</div>';
+  try{STATS=await api('getStats',force?{force:true}:{});renderStats();}catch(e){box.innerHTML='<div class="notice error">'+esc(e.message)+'</div>';}
+}
+function renderStats(){
+  const s=STATS,m=s.monthly,y=s.basis.year,ly=s.basis.lastYear||y-1,yy=yy_(y),lyy=yy_(ly);
+  $('statsBasis').textContent='집계 기준일: 납품일자 · 모든 평균값은 소수점 버림';
+  let h='';
+  h+='<h3>핵심 요약</h3><div class="stat-grid">'+
+     statCard_('총 미수금',fmtK_(s.summary.unpaid)+'원','c-rose','상태=미수 '+fmtK_(s.summary.unpaidCount)+'건')+
+     statCard_('올해 평균 Profit',fmtK_(s.summary.avgProfitThis)+'원','c-blue','출고 Profit 합계 ÷'+s.basis.monthNo+'개월')+
+     statCard_('올해 총 입금액',fmtK_(s.summary.inAmtThis)+'원','c-green','입고 '+fmtK_(s.summary.inCntThis)+'건 · Σ입고액 합계')+
+     '</div>';
+  h+='<div class="stat-grid">'+
+     statCard_('올해 판매금 합계',fmtK_(s.summary.salesThis)+'원','c-violet',yy+'년')+
+     statCard_('올해 총 출고수량',fmtK_(s.summary.outQtyThis)+'개','c-blue','출고 '+fmtK_(s.summary.outCntThis)+'건')+
+     statCard_('올해 총 입고수량',fmtK_(s.summary.inQtyThis)+'개','c-teal','입고 '+fmtK_(s.summary.inCntThis)+'건')+
+     '</div>';
+  h+='<div class="stat-grid">'+
+     statCard_('올해 Profit 합계',fmtK_(s.summary.profitThis)+'원','c-green',yy+'년')+
+     statCard_('올해 평균 출고수량',fmtK_(s.summary.avgOutThis)+'개','c-slate','÷'+s.basis.monthNo+'개월')+
+     statCard_('올해 평균 입고수량',fmtK_(s.summary.avgInThis)+'개','c-slate','÷'+s.basis.monthNo+'개월')+
+     '</div>';
+  h+='<h3>택배비</h3><div class="stat-grid">'+
+     statCard_('당월 택배비',fmtK_(s.summary.courierMonth)+'원','c-amber',s.basis.thisMonthKey||'')+
+     statCard_('전월 택배비',fmtK_(s.summary.courierPrev)+'원','c-amber',s.basis.prevMonthKey||'')+
+     statCard_('올해 총 택배비',fmtK_(s.summary.courierYear)+'원','c-slate',yy+'년')+'</div>';
+  h+='<h3>작년('+ly+') 실적 — 총합 / 월평균(÷12)</h3><div class="stat-grid">'+
+     statCard_('작년 총 입고량 / 입고액',fmtK_(s.summary.inQtyLast)+'개 · '+fmtK_(s.summary.inAmtLast)+'원','c-teal','평균 '+fmtK_(s.summary.avgInLast)+'개 · '+fmtK_(s.summary.avgInAmtLast)+'원')+
+     statCard_('작년 총 출고량 / 판매금',fmtK_(s.summary.outQtyLast)+'개 · '+fmtK_(s.summary.salesLast)+'원','c-blue','평균 '+fmtK_(s.summary.avgOutLast)+'개 · '+fmtK_(s.summary.avgSalesLast)+'원')+
+     statCard_('작년 총 Profit / 평균 Profit',fmtK_(s.summary.profitLast)+'원','c-green','평균 '+fmtK_(s.summary.avgProfitLastM)+'원')+
+     '</div>';
+  h+=monthCards_('월별 총 판매수량 및 판매금 ('+yy+'년 1월~12월)',m.salesQty,'개',m.sales,'원','');
+  h+=monthCards_('월별 총 입고수량 및 입고액 ('+yy+'년 1월~12월)',m.inQty,'개',m.inAmt,'원','green');
+  h+=monthCards_('월별 Profit ('+yy+'년 1월~12월)',m.profit,'원',null,'','violet');
+  $('statsBody').innerHTML=h;
+}
+async function searchStats(){
+  const box=$('searchStatsBox');
+  const start=$('searchStart').value,end=$('searchEnd').value;
+  if(!start||!end){toast('시작일과 종료일을 모두 선택해주세요.');return;}
+  box.innerHTML='<div class="empty"><span class="spinner"></span> 집계 중</div>';
+  try{
+    const r=await api('searchStats',{start:start,end:end});
+    box.innerHTML='<div class="muted" style="margin:8px 0">납품일자 '+esc(r.start)+' ~ '+esc(r.end)+' · '+fmtK_(r.count)+'건 (출고 '+fmtK_(r.outCount)+'건)</div><div class="stat-grid">'+
+      statCard_('판매수량',fmtK_(r.salesQty)+'개','c-blue')+statCard_('판매금',fmtK_(r.sales)+'원','c-violet')+
+      statCard_('입고수량',fmtK_(r.inQty)+'개','c-teal')+statCard_('입고액',fmtK_(r.inAmt)+'원','c-amber')+
+      statCard_('Profit',fmtK_(r.profit)+'원','c-green')+statCard_('택배비',fmtK_(r.courier)+'원','c-slate')+
+      statCard_('미수금',fmtK_(r.unpaid)+'원','c-rose')+statCard_('평균 Profit',fmtK_(r.avgProfit)+'원','c-slate','출고 건수 기준')+'</div>';
+  }catch(e){box.innerHTML='<div class="notice error">'+esc(e.message)+'</div>';}
+}
+/* ══════ v10.0 최종: 비밀번호 관리 (서버 저장 · 재배포 불필요) ══════ */
+function openPwModal(){
+  $('pwCur').value='';$('pwNew').value='';$('pwNew2').value='';$('pwNotice').innerHTML='';
+  $('pwModal').classList.remove('hidden');
+  setTimeout(function(){$('pwCur').focus();},50);
+}
+async function savePassword(){
+  const btn=$('pwSave');
+  const cur=$('pwCur').value, nw=$('pwNew').value, nw2=$('pwNew2').value;
+  if(!cur){toast('현재 비밀번호를 입력해주세요.');return;}
+  if(nw.length<4){toast('새 비밀번호는 4자 이상으로 입력해주세요.');return;}
+  if(nw!==nw2){toast('새 비밀번호 확인이 일치하지 않습니다.');return;}
+  setBusy(btn,true);$('pwNotice').innerHTML='';
+  try{
+    const r=await api('changePassword',{current:cur,next:nw});
+    $('pwModal').classList.add('hidden');
+    toast(r.message||'비밀번호를 변경했습니다.',4500);
+  }catch(e){
+    $('pwNotice').innerHTML='<div class="notice error">'+esc(e.message)+'</div>';
+    toast(e.message,5500);
+  }finally{setBusy(btn,false);}
+}
+/* ══════ v10.0: 정보 삭제 (비밀번호 → Yes/No 최종 확인 → 노션 페이지 삭제) ══════ */
+let deleteTarget=null;
+function openDelete(pageId){
+  deleteTarget=pageId;
+  $('delPw').value='';
+  $('delSub').textContent='페이지 ID: '+pageId;
+  $('deleteModal').classList.remove('hidden');
+  setTimeout(function(){$('delPw').focus();},50);
+}
+async function confirmDelete(){
+  const btn=$('delYes');
+  const pw=$('delPw').value;
+  if(!pw){toast('비밀번호를 입력해주세요.');return;}
+  if(!confirm('정말 삭제할까요?\n\n· 노션 "푸로찜 입출고 DB"의 해당 페이지가 휴지통으로 이동됩니다.\n· 삭제 기록은 변경 이력에 남습니다.'))return;
+  setBusy(btn,true);
+  try{
+    const r=await api('deletePage',{dbKey:'inouts',pageId:deleteTarget,password:pw});
+    $('deleteModal').classList.add('hidden');
+    toast(r.message||'삭제했습니다.');
+    await loadDashboard(true);
+    if(currentTab==='history')loadHistory();
+  }catch(e){toast(e.message,5500);}
+  finally{setBusy(btn,false);}
+}
+/* ── 거래처 관리 ── */
+async function loadList(key,reset){
+  reset=!!reset;
+  try{
+    if(reset){listState[key].cursor=null;listState[key].search=$(key+'Search').value.trim();$(key+'Table').innerHTML='<div class="empty"><span class="spinner"></span> 노션 조회 중</div>';}
+    const data=await api('listPages',{dbKey:key,search:listState[key].search,cursor:reset?null:listState[key].cursor,pageSize:100});
+    renderList(key,data,reset);listState[key].cursor=data.nextCursor;$('clientsMore').classList.toggle('hidden',!data.hasMore);
+  }catch(e){$('clientsTable').innerHTML='<div class="notice error">'+esc(e.message)+'</div>';}
+}
+function renderList(key,data,reset){
+  const target=$('clientsTable');
+  if(reset)target.innerHTML='<div class="table-wrap"><table><thead><tr><th>페이지명</th><th>주요 정보</th><th>최근 수정</th><th>관리</th></tr></thead><tbody id="clientsRows"></tbody></table></div>';
+  const body=$('clientsRows');
+  if(!data.pages.length&&reset){target.innerHTML='<div class="empty">조회 결과가 없습니다.</div>';return;}
+  if(!body)return;
+  data.pages.forEach(function(p){
+    const summary=['연락처','도로명주소','총 출고량'].map(function(k){
+      return (p.values[k]!==undefined&&p.values[k]!=='')?k+': '+(Array.isArray(p.values[k])?p.values[k].join(', '):p.values[k]):'';
+    }).filter(Boolean).join(' · ');
+    const tr=document.createElement('tr');
+    tr.innerHTML='<td><div class="row-title">'+esc(p.title||'(제목 없음)')+'</div><div class="history-meta">'+esc(p.id)+'</div></td><td>'+esc(summary||'—')+'</td>'+
+      '<td>'+esc((p.editedTime||'').replace('T',' ').slice(0,16))+'</td>'+
+      '<td><div class="row-actions"><button class="primary" data-edit="'+esc(p.id)+'">수정</button><button class="danger" data-archive="'+esc(p.id)+'">보관</button></div></td>';
+    body.appendChild(tr);
+  });
+  body.querySelectorAll('[data-edit]').forEach(function(b){b.addEventListener('click',function(){openEdit('clients',b.dataset.edit);});});
+  body.querySelectorAll('[data-archive]').forEach(function(b){b.addEventListener('click',function(){archive('clients',b.dataset.archive);});});
+}
+async function openEdit(key,pageId){
+  try{
+    const data=await api('getPage',{dbKey:key,pageId:pageId});
+    currentEdit={dbKey:key,pageId:pageId};activeSchema=data.schema;activeRelationOptions=data.relationOptions||{};isNewClient=false;
+    $('modalTitle').textContent=(key==='clients'?'거래처':'입출고')+' 정보 수정';
+    $('modalSub').textContent=data.page.title+' · 변경 전/후 값 자동 기록';
+    $('modalNotice').innerHTML='<div class="notice">저장을 누르면 확인 팝업 후 변경된 속성만 노션에 반영되고 이력이 기록됩니다.</div>';
+    renderForm(data.schema,data.page.values,false);
+    $('editModal').classList.remove('hidden');
+  }catch(e){toast(e.message,5000);}
+}
+function openNewClient(){
+  const schema=INIT.databases.clients.properties;
+  currentEdit={dbKey:'clients',pageId:null};activeSchema=schema;activeRelationOptions={};isNewClient=true;
+  $('modalTitle').textContent='신규 거래처 등록';$('modalSub').textContent='거래처 DB에 새 페이지를 생성합니다.';
+  $('modalNotice').innerHTML='<div class="notice">입력한 속성은 모두 변경 이력에 기록됩니다. 자동 계산 속성은 입력하지 않습니다.</div>';
+  renderForm(schema,{},true);$('editModal').classList.remove('hidden');
+}
+function openReuseClient(pageId,name){
+  api('getPage',{dbKey:'clients',pageId:pageId}).then(function(data){
+    currentEdit={dbKey:'clients',pageId:pageId,reuse:true};activeSchema=data.schema;activeRelationOptions=data.relationOptions||{};isNewClient=false;
+    $('modalTitle').textContent='휴면 거래처 재사용';$('modalSub').textContent=name+' · 저장 직전 서버 재검증';
+    $('modalNotice').innerHTML='<div class="notice warning">총 출고량 0 + 연결 입출고 0건을 다시 검증합니다. 실패하면 기존 페이지는 수정되지 않습니다.</div>';
+    renderForm(data.schema,data.page.values,false);$('editModal').classList.remove('hidden');
+  }).catch(function(e){toast(e.message,5000);});
+}
+/* ══════ v10.0 최종: 속성 순서(기본 42단계) + 드래그/▲▼ 이동 + 브라우저 저장 ══════ */
+const FIELD_ORDER_V10=[
+  '순번','거래처','거래처(사업자)','__address__','도로명주소','지번주소','단가','연락처 1','이메일','담당자',
+  '연락처 2','이메일2','입금자명','Fax','등록번호','종사업장번호','홈택스주소','비고 (특이사항)','대표자','정기 거래처원장',
+  '정기 발송일','당월원장발송완료','당월 거래처원장','기간별 거래처원장','기간원장발송완료','고객 유형','수금주기','납품 횟수','총 출고량','누적판매금',
+  '누적이익','마지막 납품일','경과일','마지막 입금일','입금경과일','배송형태','입금일 List','푸로찜입출고 DB','납품일 List','입출고',
+  '총 입고량','미입금확인'
+];
+/* v10.0 최종(개선): 입출고 DB 수정창 기본 순서 — 요청하신 72속성 희망 순번(순번1~72 → 이름 검증 72/72 일치) */
+const FIELD_ORDER_INOUTS_V10=[
+  '입출고','거래처 롤업','거래처명','구분(규격)',
+  '수량','결과체크','판매금','최종입금액',
+  '납품형태','주문일자','납품요청일','납품일자',
+  '입고일자','주소','제2배송지','상태',
+  '입금일자','입금자명','Profit','택배발송',
+  '최종 적용단가','제품단가','특별 단가입력','택배비',
+  '입금액(수정용)','비고','사업자번호','연락처 1',
+  '이메일','거래처 단가','입고량','실제입고수량',
+  '입고액','공급단가','공급가액','세액',
+  '발주ID','발주','웹앱제어','발주서발송여부',
+  '발주관리번호','명세표발행','거래처발송대기','명세표발송여부',
+  '명세표관리번호','업체계산서발행요청일','집계월','기준월',
+  '계산서 발행','처리중','발행완료','박스히어로완료',
+  'Slack전송완료','생성일시','관리번호','ID',
+  '제품명','출고량','최종 편집 일시','실제출고수량',
+  '출고여부','배송정보 추출','배송필요','납품요청일(요일)',
+  '기준연도','분기','반기','Place',
+  '기준일','거래처','연락처','경과'
+];
+const WIDE_FIELDS_V10=['도로명주소','지번주소','홈택스주소','비고 (특이사항)','거래처(사업자)'];
+const ORDER_LS_KEY='prozyme_field_order_v100';
+let __fieldNodes__={},dragField_=null;
+
+function orderDbKey_(){return (currentEdit&&currentEdit.dbKey)||'clients';}
+function readSavedOrder_(){
+  try{
+    const raw=localStorage.getItem(ORDER_LS_KEY);
+    if(!raw)return null;
+    const o=JSON.parse(raw)||{};
+    const a=o[orderDbKey_()];
+    return Array.isArray(a)?a.slice():null;
+  }catch(_){return null;}
+}
+function writeSavedOrder_(arr){
+  try{
+    let o={};
+    try{o=JSON.parse(localStorage.getItem(ORDER_LS_KEY)||'{}')||{};}catch(_){o={};}
+    o[orderDbKey_()]=arr;
+    localStorage.setItem(ORDER_LS_KEY,JSON.stringify(o));
+  }catch(_){}
+}
+function clearSavedOrder_(){
+  try{
+    let o={};
+    try{o=JSON.parse(localStorage.getItem(ORDER_LS_KEY)||'{}')||{};}catch(_){o={};}
+    delete o[orderDbKey_()];
+    localStorage.setItem(ORDER_LS_KEY,JSON.stringify(o));
+  }catch(_){}
+}
+/* 저장된 순서 → 기본 순서(거래처) → 나머지는 스키마 순서로 뒤에 붙임 (필드 유실 절대 없음) */
+function buildFieldOrder_(keys){
+  const saved=readSavedOrder_();
+  let seq;
+  if(saved&&saved.length)seq=saved.slice();
+  else if(orderDbKey_()==='clients')seq=FIELD_ORDER_V10.slice();
+  else if(orderDbKey_()==='inouts')seq=FIELD_ORDER_INOUTS_V10.slice();
+  else seq=keys.slice();
+  const out=[];
+  seq.forEach(function(n){if(keys.indexOf(n)>=0&&out.indexOf(n)<0)out.push(n);});
+  keys.forEach(function(n){if(out.indexOf(n)<0)out.push(n);});
+  return out;
+}
+function applyFieldOrder_(order){
+  const form=$('editForm');
+  if(!form)return;
+  (order||[]).forEach(function(n){const el=__fieldNodes__[n];if(el)form.appendChild(el);});
+}
+/* v10.0 최종(개선): 순서 변경은 '확정 저장' 방식으로 개선 —
+   · 드래그/▲▼ 중에는 화면(임시)에만 반영되고 localStorage 는 절대 건드리지 않음
+   · "순서 편집 끝내기" → Confirm(Yes) 시에만 저장·적용, No/닫기/나가기는 기존 순서 그대로 복원 */
+let __draftOrder__=null,__committedOrder__=null;
+function currentDomOrder_(){
+  const form=$('editForm');
+  return Array.prototype.slice.call(form.querySelectorAll('.field')).map(function(f){return f.dataset.fieldName||'';}).filter(Boolean);
+}
+function persistFieldOrder_(){__draftOrder__=currentDomOrder_();}
+function moveField_(node,dir){
+  const form=$('editForm');
+  const list=Array.prototype.slice.call(form.querySelectorAll('.field'));
+  const i=list.indexOf(node), j=i+dir;
+  if(i<0||j<0||j>=list.length)return;
+  if(dir<0)form.insertBefore(node,list[j]);else form.insertBefore(list[j],node);
+  persistFieldOrder_();
+}
+function setOrderEditMode_(on){
+  const form=$('editForm');
+  if(!form)return;
+  form.classList.toggle('editing',!!on);
+  Array.prototype.slice.call(form.querySelectorAll('.field')).forEach(function(f){
+    if(on)f.setAttribute('draggable','true');else f.removeAttribute('draggable');
+  });
+  const tg=$('orderToggle'),bar=$('orderBar');
+  if(tg)tg.textContent=on?'순서 편집 끝내기':'순서 편집';
+  if(bar)bar.classList.toggle('hidden',!on);
+}
+function bindFieldDrag_(form){
+  Array.prototype.slice.call(form.querySelectorAll('.field')).forEach(function(node){
+    node.addEventListener('dragstart',function(e){
+      if(!form.classList.contains('editing')){e.preventDefault();return;}
+      dragField_=node;node.classList.add('dragging');
+      try{e.dataTransfer.effectAllowed='move';e.dataTransfer.setData('text/plain',node.dataset.fieldName||'');}catch(_){}
+    });
+    node.addEventListener('dragend',function(){node.classList.remove('dragging');dragField_=null;persistFieldOrder_();});
+    node.addEventListener('dragover',function(e){
+      if(!dragField_||dragField_===node)return;
+      e.preventDefault();
+      const r=node.getBoundingClientRect();
+      if((e.clientY-r.top)>r.height/2)form.insertBefore(dragField_,node.nextSibling);else form.insertBefore(dragField_,node);
+    });
+    node.addEventListener('drop',function(e){e.preventDefault();});
+    Array.prototype.slice.call(node.querySelectorAll('.mv')).forEach(function(b){
+      b.addEventListener('click',function(ev){ev.preventDefault();ev.stopPropagation();moveField_(node,Number(b.dataset.mv));});
+    });
+  });
+}
+function renderForm(schema,values,isCreate){
+  initialFormValues=JSON.parse(JSON.stringify(values||{}));
+  const form=$('editForm');form.innerHTML='';
+  __fieldNodes__={};dragField_=null;
+  schema.forEach(function(s){
+    const wrap=document.createElement('div');
+    const isClients=(orderDbKey_()==='clients');
+    const wide=isClients?(WIDE_FIELDS_V10.indexOf(s.name)>=0):(s.type==='rich_text');
+    wrap.className='field'+(wide?' wide':'');
+    wrap.dataset.fieldName=s.name;
+    const tools=document.createElement('div');
+    tools.className='ftools';
+    tools.innerHTML='<span class="fh" title="끌어서 이동">⠿</span><button type="button" class="mv" data-mv="-1" title="위로 이동">▲</button><button type="button" class="mv" data-mv="1" title="아래로 이동">▼</button>';
+    wrap.appendChild(tools);
+    const label=document.createElement('label');label.textContent=s.name+'  ·  '+s.type;wrap.appendChild(label);
+    let el;
+    const val=values[s.name]===undefined?'':values[s.name];
+    if(!s.editable){
+      el=document.createElement('input');el.disabled=true;el.className='read-only';el.value=Array.isArray(val)?val.join(', '):String(val);
+      wrap.appendChild(el);
+      const hint=document.createElement('small');hint.textContent='자동 계산 / 롤업 / 시스템 속성 - 읽기 전용';wrap.appendChild(hint);
+      __fieldNodes__[s.name]=wrap;return;
+    }
+    if(s.type==='checkbox'){el=document.createElement('input');el.type='checkbox';el.checked=!!val;el.style.width='22px';el.style.minHeight='22px';}
+    else if(s.type==='select'||s.type==='status'||s.type==='multi_select'){
+      el=document.createElement('select');
+      if(s.type==='multi_select')el.multiple=true;
+      const blank=document.createElement('option');blank.value='';blank.textContent=s.type==='multi_select'?'(선택 없음)':'(선택 안 함)';el.appendChild(blank);
+      (s.options||[]).forEach(function(opt){
+        const o=document.createElement('option');o.value=opt;o.textContent=opt;
+        if(s.type!=='multi_select'&&val===opt)o.selected=true;
+        if(s.type==='multi_select'&&String(val).split(', ').indexOf(opt)>=0)o.selected=true;
+        el.appendChild(o);
+      });
+      if(s.type!=='multi_select'&&val&&!Array.from(el.options).some(function(o){return o.value===val;})){
+        const legacy=document.createElement('option');legacy.value=val;legacy.textContent=val+' (기존 값)';legacy.selected=true;el.appendChild(legacy);
+      }
+      el.size=s.type==='multi_select'?Math.min(5,(s.options||[]).length+1):1;
+    }
+    else if(s.type==='relation'){
+      el=document.createElement('select');el.multiple=true;el.size=5;
+      const opts=activeRelationOptions[s.name]||[];
+      opts.forEach(function(o){const op=document.createElement('option');op.value=o.id;op.textContent=o.name;op.selected=Array.isArray(val)&&val.indexOf(o.id)>=0;el.appendChild(op);});
+      (Array.isArray(val)?val:[]).forEach(function(id){
+        if(!Array.from(el.options).some(function(o){return o.value===id;})){const op=document.createElement('option');op.value=id;op.textContent='(기존 연결) '+id;op.selected=true;el.appendChild(op);}
+      });
+      if(!opts.length){el=document.createElement('textarea');el.placeholder='관련 페이지 ID를 줄바꿈 또는 쉼표로 입력';el.value=Array.isArray(val)?val.join('\n'):String(val||'');}
+    }
+    else if(s.type==='rich_text'){el=document.createElement('textarea');el.value=String(val||'');}
+    else{
+      el=document.createElement('input');
+      el.type=s.type==='number'?'number':s.type==='date'?'date':s.type==='email'?'email':s.type==='url'?'url':'text';
+      el.value=s.type==='date'?String(val||'').slice(0,10):String(val||'');
+      if(s.type==='date')el.dataset.originalDate=String(val||'');
+      if(s.type==='number')el.step='any';
+    }
+    el.dataset.prop=s.name;el.dataset.type=s.type;wrap.appendChild(el);
+    if(s.name==='도로명주소'||s.name==='지번주소'){
+      const small=document.createElement('small');small.textContent='아래 주소 검색 버튼으로 한 번에 입력할 수 있습니다.';wrap.appendChild(small);
+    }
+    __fieldNodes__[s.name]=wrap;
+  });
+  const road=schema.some(function(x){return x.name==='도로명주소';}),jibun=schema.some(function(x){return x.name==='지번주소';});
+  if(road||jibun){
+    const address=document.createElement('div');
+    address.className='field wide';
+    address.dataset.fieldName='__address__';
+    address.innerHTML='<label>주소 검색</label><div><button type="button" class="secondary" id="postcodeBtn">다음 주소 검색</button> <span class="muted">도로명·지번주소를 자동 입력합니다.</span></div>';
+    __fieldNodes__['__address__']=address;
+  }
+  /* v10.0 최종: 요청한 42단계 순서로 배치 (저장된 순서가 있으면 그것 우선) */
+  applyFieldOrder_(buildFieldOrder_(Object.keys(__fieldNodes__)));
+  const pc=$('postcodeBtn');
+  if(pc)pc.addEventListener('click',openPostcode);
+  bindFieldDrag_(form);
+  setOrderEditMode_(false);
+}
+function openPostcode(){
+  if(!window.daum||!daum.Postcode){toast('다음 주소 검색 서비스를 불러오지 못했습니다.',5000);return;}
+  new daum.Postcode({oncomplete:function(data){
+    const road=$('editForm').querySelector('[data-prop="도로명주소"]');
+    const jibun=$('editForm').querySelector('[data-prop="지번주소"]');
+    if(road)road.value=data.roadAddress||data.autoRoadAddress||'';
+    if(jibun)jibun.value=data.jibunAddress||data.autoJibunAddress||'';
+    toast('도로명주소와 지번주소를 입력했습니다.');
+  }}).open();
+}
+function collectForm(){
+  const values={};
+  $('editForm').querySelectorAll('[data-prop]').forEach(function(el){
+    const n=el.dataset.prop,t=el.dataset.type;
+    let v;
+    if(t==='checkbox')v=el.checked;
+    else if(t==='multi_select'||t==='relation'){v=el.tagName==='SELECT'?Array.from(el.selectedOptions).map(function(x){return x.value;}).filter(Boolean):el.value;}
+    else if(t==='date')v=(el.value===String(el.dataset.originalDate||'').slice(0,10)&&el.dataset.originalDate)?el.dataset.originalDate:el.value;
+    else v=el.value;
+    const old=initialFormValues[n]===undefined?'':initialFormValues[n];
+    const norm=function(x){return Array.isArray(x)?x.slice().sort():x;};
+    if(isNewClient||JSON.stringify(norm(v))!==JSON.stringify(norm(old)))values[n]=v;
+  });
+  return values;
+}
+async function saveModal(){
+  const btn=$('modalSave');
+  const values=collectForm(),changed=Object.keys(values).length;
+  if(!isNewClient&&changed===0){toast('변경된 내용이 없습니다.');return;}
+  if(!confirm('저장 및 이력 기록을 진행할까요?\n\n· 변경 속성 '+changed+'건이 노션에 반영됩니다.\n· 변경 전/후 값이 변경 이력 Log에 기록됩니다.'))return;
+  setBusy(btn,true);
+  try{
+    let result;
+    if(isNewClient)result=await api('createClient',{values:values});
+    else if(currentEdit.reuse)result=await api('reuseDormantClient',{pageId:currentEdit.pageId,values:values});
+    else result=await api('updatePage',{dbKey:currentEdit.dbKey,pageId:currentEdit.pageId,values:values});
+    $('editModal').classList.add('hidden');
+    toast(result.message||'저장했습니다.');
+    await loadList('clients',true);
+    if(currentTab==='dashboard')loadDashboard();
+    if(currentTab==='history')await loadHistory();
+  }catch(e){
+    $('modalNotice').innerHTML='<div class="notice error">'+esc(e.message)+'</div>';
+    toast(e.message,5000);
+  }finally{setBusy(btn,false);}
+}
+async function archive(key,id){
+  if(!confirm('이 페이지를 보관(삭제)할까요?\n영구 삭제가 아닌 노션 휴지통으로 이동합니다.'))return;
+  try{const r=await api('archivePage',{dbKey:key,pageId:id});toast(r.message);await loadList(key,true);if(currentTab==='history')loadHistory();}
+  catch(e){toast(e.message,5000);}
+}
+async function loadDormant(){
+  const box=$('dormantCandidates');
+  box.innerHTML='<div class="empty"><span class="spinner"></span> 후보 확인 중</div>';
+  try{
+    const r=await api('dormantCandidates',{});
+    if(!r.length){box.innerHTML='<div class="empty">총 출고량 0인 거래처 후보가 없습니다.</div>';return;}
+    box.innerHTML='<div class="notice">아래는 1차 후보입니다. 실제 재사용은 저장 시 연결 입출고 0건까지 서버가 재검증합니다.</div><div class="table-wrap"><table><thead><tr><th>기존 거래처명</th><th>페이지 ID</th><th>작업</th></tr></thead><tbody>'+
+      r.map(function(x){return '<tr><td>'+esc(x.name)+'</td><td class="history-meta">'+esc(x.id)+'</td><td><button class="secondary" data-reuse="'+esc(x.id)+'" data-name="'+esc(x.name)+'">이 페이지 재사용</button></td></tr>';}).join('')+'</tbody></table></div>';
+    box.querySelectorAll('[data-reuse]').forEach(function(b){b.addEventListener('click',function(){openReuseClient(b.dataset.reuse,b.dataset.name);});});
+  }catch(e){box.innerHTML='<div class="notice error">'+esc(e.message)+'</div>';}
+}
+async function loadHistory(){
+  const target=$('historyTable');
+  target.innerHTML='<div class="empty"><span class="spinner"></span> 변경 이력 조회 중</div>';
+  try{
+    const r=await api('getHistory',{db:$('historyDb').value,keyword:$('historyKeyword').value.trim(),actionFilter:$('historyAction').value});
+    const link=$('auditSheetLink');link.href=r.spreadsheetUrl;link.classList.remove('hidden');
+    if(r.sheetName)$('historySub').textContent='추가·수정·납품일자 입력·보관·복원 내역입니다. 기록은 이 스프레드시트의 "'+r.sheetName+'" 시트에 저장됩니다.';
+    if(!r.rows.length){target.innerHTML='<div class="empty">변경 이력이 없습니다.</div>';return;}
+    target.innerHTML='<div class="muted" style="margin-bottom:8px">검색 결과 '+r.total.toLocaleString()+'건 · 최신순 최대 500건</div><div class="table-wrap"><table><thead><tr><th>기록일시</th><th>작업</th><th>DB / 페이지</th><th>속성</th><th>As is</th><th>To be</th><th>관리</th></tr></thead><tbody>'+
+      r.rows.map(function(x){
+        return '<tr><td style="white-space:nowrap">'+esc(x.timestamp)+'</td><td><span class="pill">'+esc(x.action)+'</span></td>'+
+          '<td>'+esc(x.db)+'<div class="history-meta">'+esc(x.titleBefore||x.titleAfter)+'<br>'+esc(x.pageId)+'</div></td>'+
+          '<td>'+esc(x.property)+'</td><td><div class="log-change">'+esc(x.before)+'</div></td><td><div class="log-change">'+esc(x.after)+'</div></td>'+
+          '<td>'+(x.action==='보관(삭제)'?'<button class="secondary" data-restore="'+esc(x.pageId)+'" data-db="'+(x.db==='거래처 DB'?'clients':'inouts')+'">복원</button>':'—')+'</td></tr>';
+      }).join('')+'</tbody></table></div>';
+    target.querySelectorAll('[data-restore]').forEach(function(b){
+      b.addEventListener('click',async function(){
+        if(!confirm('이 페이지를 복원할까요?'))return;
+        try{const x=await api('restorePage',{dbKey:b.dataset.db,pageId:b.dataset.restore});toast(x.message);loadHistory();}
+        catch(e){toast(e.message,5000);}
+      });
+    });
+  }catch(e){target.innerHTML='<div class="notice error">'+esc(e.message)+'</div>';}
+}
+/* ══════ 새로고침 (페이지 리로드 아님 — 지금 탭만 다시 조회) ══════ */
+async function doRefresh(){
+  const btn=$('refreshBtn');
+  if(btn.disabled)return;
+  btn.disabled=true;btn.classList.add('spinning');
+  const label=$('connectionLabel');
+  try{
+    await api('health',{});
+    if(!INIT)INIT=await api('initial',{});
+    label.className='on';label.textContent='연결됨';
+    if(currentTab==='dashboard'){await loadDashboard(true);}
+    else if(currentTab==='stats'){
+      $('searchStatsBox').innerHTML='';
+      await loadStats(true);
+    }
+    else if(currentTab==='clients'){await loadList('clients',true);}
+    else if(currentTab==='history'){await loadHistory();}
+    else if(currentTab==='newclient'){$('dormantCandidates').innerHTML='';}
+    toast('최신 정보로 새로고침했습니다.');
+  }catch(e){
+    label.className='off';label.textContent='연결 끊김';
+    toast('새로고침 실패: '+e.message,6000);
+  }finally{
+    btn.disabled=false;btn.classList.remove('spinning');
+  }
+}
+/* ── 이벤트 ── */
+document.querySelectorAll('.tab').forEach(function(b){b.addEventListener('click',function(){switchTab(b.dataset.tab);});});
+$('manualBtn').addEventListener('click',function(){$('manualModal').classList.remove('hidden');});
+$('pwBtn').addEventListener('click',openPwModal);
+$('pwClose').addEventListener('click',function(){$('pwModal').classList.add('hidden');});
+$('pwCancel').addEventListener('click',function(){$('pwModal').classList.add('hidden');});
+$('pwSave').addEventListener('click',savePassword);
+$('pwNew2').addEventListener('keydown',function(e){if(e.key==='Enter')savePassword();});
+$('orderToggle').addEventListener('click',function(){
+  const form=$('editForm');
+  if(!form.classList.contains('editing')){
+    __committedOrder__=currentDomOrder_();__draftOrder__=null;
+    setOrderEditMode_(true);return;
+  }
+  if(confirm('변경된 순서를 최종 적용할까요?\n\n· Yes  = 지금 바꾼 순서가 이 브라우저에 저장·적용됩니다.\n· No(취소) = 순서 변경이 모두 취소되고 기존 순서로 되돌아갑니다.')){
+    writeSavedOrder_(__draftOrder__&&__draftOrder__.length?__draftOrder__:currentDomOrder_());
+    setOrderEditMode_(false);
+    toast('순서 변경 사항을 저장·적용했습니다.',2200);
+  }else{
+    if(__committedOrder__&&__committedOrder__.length)applyFieldOrder_(__committedOrder__);
+    setOrderEditMode_(false);
+    toast('순서 변경을 취소했습니다. (기존 순서 유지)',2200);
+  }
+});
+$('orderReset').addEventListener('click',function(){
+  clearSavedOrder_();
+  applyFieldOrder_(buildFieldOrder_(Object.keys(__fieldNodes__)));
+  toast('기본 순서로 되돌렸습니다.',1800);
+});
+$('manualClose').addEventListener('click',function(){$('manualModal').classList.add('hidden');});
+$('refreshBtn').addEventListener('click',doRefresh);
+$('clientsSearchBtn').addEventListener('click',function(){loadList('clients',true);});
+$('clientsReload').addEventListener('click',function(){loadList('clients',true);});
+$('clientsSearch').addEventListener('keydown',function(e){if(e.key==='Enter')loadList('clients',true);});
+$('clientsMore').addEventListener('click',function(){loadList('clients',false);});
+$('clientsAdd').addEventListener('click',function(){switchTab('newclient');openNewClient();});
+$('newClientBtn').addEventListener('click',openNewClient);
+$('dormantLoadBtn').addEventListener('click',loadDormant);
+$('historySearchBtn').addEventListener('click',loadHistory);
+$('historyKeyword').addEventListener('keydown',function(e){if(e.key==='Enter')loadHistory();});
+$('searchStatsBtn').addEventListener('click',searchStats);
+function closeEditModal_(){
+  const form=$('editForm');
+  if(form&&form.classList.contains('editing')){
+    if(__committedOrder__&&__committedOrder__.length)applyFieldOrder_(__committedOrder__);
+    setOrderEditMode_(false);
+  }
+  $('editModal').classList.add('hidden');
+}
+$('modalClose').addEventListener('click',closeEditModal_);
+$('modalCancel').addEventListener('click',closeEditModal_);
+$('modalSave').addEventListener('click',saveModal);
+$('delClose').addEventListener('click',function(){$('deleteModal').classList.add('hidden');});
+$('delNo').addEventListener('click',function(){$('deleteModal').classList.add('hidden');});
+$('delYes').addEventListener('click',confirmDelete);
+$('delPw').addEventListener('keydown',function(e){if(e.key==='Enter')confirmDelete();});
+document.addEventListener('keydown',function(e){
+  if(e.key==='Escape'){closeEditModal_();$('manualModal').classList.add('hidden');$('deleteModal').classList.add('hidden');$('pwModal').classList.add('hidden');}
+});
+boot();
+</script>
+<script>
+if('serviceWorker' in navigator){
+  window.addEventListener('load',function(){
+    navigator.serviceWorker.register('./sw.js').catch(function(e){console.warn('서비스워커 등록 실패:',e);});
+  });
+}
+</script>
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous"></script>
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous"></script>
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous"></script>
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous"></script>
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous"></script>
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous"></script>
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous"></script>
+</body>
+</html>

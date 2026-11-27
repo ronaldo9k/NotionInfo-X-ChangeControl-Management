@@ -72,6 +72,19 @@ td{padding:8px;border-bottom:1px solid #f1f4f8;vertical-align:middle}
 /* v10.0: 오늘 납품요청일 강조 + 삭제 버튼 */
 .today-td{background:#eef3ff;color:#1b46b8;font-weight:700}
 .danger-solid{background:var(--red);color:#fff}
+/* ══════ v10.2 [R3]: 월별 통합표 (판매/Profit/입고 한 표) ══════ */
+.cmb th,.cmb td{text-align:center;padding:7px 6px;white-space:nowrap}
+.cmb thead th{background:var(--navy);color:#fff;font-size:12px}
+.cmb tbody th{background:#f8fafc;font-size:12px;color:#475467;white-space:nowrap}
+.cmb td.c-blue{background:#eaf0ff;color:#1b46b8;font-weight:800}
+.cmb td.c-green{background:#e8f8f0;color:#0c6844;font-weight:800}
+.cmb td.c-violet{background:#f4eeff;color:#5b32b0;font-weight:800}
+.cmb td.big{font-size:14.5px;letter-spacing:-.4px}
+.cmb tfoot th{background:#f2f4f7;font-size:11.5px;color:#334155;border-top:2px solid var(--line)}
+/* ══════ v10.2 [R1]: 입출고 검색 ══════ */
+.io-summary{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0}
+.io-chip{background:#eaf0ff;color:#1b46b8;border-radius:999px;padding:5px 12px;font-size:12px;font-weight:700}
+.io-chip.g{background:#e8f8f0;color:#0c6844}
 .spinner{display:inline-block;width:14px;height:14px;border:2px solid rgba(0,0,0,.15);border-top-color:var(--blue);border-radius:50%;animation:spin .8s linear infinite;vertical-align:-2px}
 @keyframes spin{to{transform:rotate(360deg)}}
 .modal-backdrop{position:fixed;inset:0;background:rgba(16,24,39,.45);z-index:100;display:flex;align-items:flex-start;justify-content:center;padding:5vh 14px;overflow:auto}
@@ -229,6 +242,7 @@ td{padding:8px;border-bottom:1px solid #f1f4f8;vertical-align:middle}
     <button class="tab" data-tab="clients">거래처 관리</button>
     <button class="tab" data-tab="newclient">거래처 추가</button>
     <button class="tab" data-tab="history">변경 이력</button>
+    <button class="tab" data-tab="inoutsearch">입출고 검색</button>
   </nav>
 
   <section id="dashboardPanel" class="panel">
@@ -278,6 +292,26 @@ td{padding:8px;border-bottom:1px solid #f1f4f8;vertical-align:middle}
     <div class="actions"><a id="auditSheetLink" href="#" target="_blank" rel="noopener" class="hidden"><button class="secondary">Google 시트 '변경 이력 Log' 열기</button></a></div>
   </section>
   <div class="foot">푸로찜 총판 관리시스템 v10.0 최종</div>
+
+  <section id="inoutsearchPanel" class="panel hidden">
+    <h2>입출고 검색</h2>
+    <div class="muted">노션 "푸로찜 입출고 DB"의 모든 페이지를 거래처·기간으로 검색합니다. 날짜 바로가기(이번달/두달/올해)로 빠르게 기간을 고를 수 있어요.</div>
+    <div class="toolbar">
+      <input id="ioSearchInput" list="ioClientList" placeholder="거래처 검색 (입력하면 후보 표시 · 누르면 가나다 전체 목록)">
+      <datalist id="ioClientList"></datalist>
+      <button class="primary" id="ioSearchBtn">검색</button>
+      <button class="secondary" id="ioReloadBtn">🔄 다시 조회</button>
+    </div>
+    <div class="toolbar">
+      <input type="date" id="ioStart" aria-label="시작일" title="납품일자(없으면 주문일자) 기준 시작일">
+      <input type="date" id="ioEnd" aria-label="종료일" title="납품일자(없으면 주문일자) 기준 종료일">
+      <button class="ghost" id="ioPresetMonth">이번달</button>
+      <button class="ghost" id="ioPreset2m">두달</button>
+      <button class="ghost" id="ioPresetYear">올해</button>
+      <button class="ghost" id="ioPresetClear">기간 지우기</button>
+    </div>
+    <div id="ioSearchBox"><div class="empty">거래처 또는 기간을 선택하고 검색하세요. (조건 없이 검색하면 전체 목록이 나옵니다)</div></div>
+  </section>
 </main>
 
 <div class="modal-backdrop hidden" id="editModal"><div class="modal"><div class="modal-head"><div><h2 id="modalTitle">정보 수정</h2><div class="muted" id="modalSub"></div></div><div style="display:flex;gap:6px;flex-shrink:0"><button class="ghost" id="orderToggle" type="button">순서 편집</button><button class="modal-close" id="modalClose">닫기 ✕</button></div></div><div id="modalNotice"></div><div class="order-bar hidden" id="orderBar"><span>⠿ 를 끌어다 놓거나 ▲▼ 로 순서를 바꾼 뒤 <b>"순서 편집 끝내기"에서 최종 확인(Yes)</b>해야 이 브라우저에 저장·적용됩니다.</span><button type="button" class="secondary" id="orderReset">기본 순서로</button></div><div id="editForm" class="form-grid"></div><div class="actions"><button class="secondary" id="modalCancel">취소</button><button class="primary" id="modalSave">저장 및 이력 기록</button></div></div></div>
@@ -306,7 +340,8 @@ td{padding:8px;border-bottom:1px solid #f1f4f8;vertical-align:middle}
 <li><b>① 푸로찜제품별 현황</b> : 표 1장으로 제품(12/15/20 KG) 재고를 한눈에 봅니다.
 <div class="box">· <b>현재 재고량</b>(파란 음영) = 창고에 실제 있는 양<br>· <b>예정 재고량</b>(초록 음영) = 앞으로의 납품까지 반영한 양<br>· <b>마지막 입고</b> = 마지막으로 창고에 들어온 날. <code>26-11-16 (2일)</code>처럼 며칠 지났는지도 알려주고, 30일이 넘으면 주황색이 됩니다.</div></li>
 <li><b>② 배송 필요 List (출고 대기)</b> : 손님에게 보내야 하는 것들. <b>③ 본사납품 필요 List (입고 대기)</b> : 본사에서 받아야 하는 것들.
-<div class="box">· <b>날짜 옆 (월)(화)(수)…</b> : 납품요청일의 요일이 한 글자로 표시됩니다.
+<div class="box">· <b>언제 보이나요?</b> <b>납품일자가 비어 있는 페이지는 전부</b> 표시됩니다. 선입금(입금일자 있음)이어도, 납품일자를 아직 안 채웠다면 반드시 보입니다. 납품일자를 입력하면 그 때 목록에서 사라집니다.
+· <b>날짜 옆 (월)(화)(수)…</b> : 납품요청일의 요일은 <b>항상 한글 한 글자</b>로 표시됩니다. (12월 등에 영문(Tue)으로 보이던 현상 수정 — 앱이 요일을 직접 계산)
 · <b>오늘이 납품요청일인 행</b>은 <b>거래처와 납품형태가 파란 음영</b>으로 표시되어 한눈에 구분됩니다.
 · <b>납품일자 칸</b>을 눌러 달력에서 날짜를 고르면 <b>저장 버튼 없이 바로 노션에 저장</b>됩니다. (저장 중 주황 테두리 → 성공하면 초록 테두리)</div></li>
 <li><b>④ 최근 납품 List</b> : 최근 7일 동안의 납품 기록입니다.</li>
@@ -321,7 +356,7 @@ td{padding:8px;border-bottom:1px solid #f1f4f8;vertical-align:middle}
 <li><b>올해 총 입금액</b> : 올해 받은 돈(Σ입고액)의 총합.</li>
 <li><b>작년 실적 3개 카드</b> : ① 입고량/입고액 ② 출고량/판매금 ③ Profit — 각각 <b>총합</b>과 <b>12으로 나눈 월 평균</b>이 같이 나옵니다.</li>
 <li><b>택배비 카드</b> : 당월·전월·올해 총 택배비.</li>
-<li><b>월별 카드 3줄</b> : 1월~12월을 판매·입고·Profit으로 각각 보여줍니다. 위 칸은 수량, 아래 칸은 금액이에요.</li>
+<li><b>월별 통합표 (1장)</b> : 1월~12월을 한 표로 봅니다. 위에서부터 <b>판매수량 → 판매금 → Profit → 입고수량 → 입고액</b> 5줄이고, 판매금·입고액 숫자는 크게 표시됩니다. (제목 연도는 올해년도가 자동 표시 — 내년이 되면 27년으로 바뀝니다)</li>
 <li><b>기간 검색</b> : 시작일~종료일을 고르고 "조회"를 누르면 그 기간 동안의 실적 합계가 나옵니다.</li>
 
 <h4>🏪 거래처 관리 / 거래처 추가 탭</h4>
@@ -335,6 +370,14 @@ td{padding:8px;border-bottom:1px solid #f1f4f8;vertical-align:middle}
 <li>보관(삭제)한 페이지는 <b>복원</b> 버튼으로 되살릴 수 있습니다.</li>
 <li>아래 버튼을 누르면 구글시트 "변경 이력 Log"가 새 창에서 열립니다.</li>
 
+<h4>🔎 입출고 검색 탭</h4>
+<li><b>거래처 검색</b> : 글자를 입력하면 <b>매칭 후보가 바로 보이고</b> 선택할 수 있고, 검색칸을 누르면 <b>가나다순 전체 거래처 목록</b>에서 고를 수 있습니다.</li>
+<li><b>기간 바로가기</b> : <b>이번달 / 두달 / 올해</b> 버튼 또는 시작일~종료일 캘린더로 기간을 지정합니다. (납품일자 기준, 납품일자가 없으면 주문일자)</li>
+<li><b>검색 결과 2개 표</b> :
+<div class="box">· <b>출고 표</b>(입출고="출고" 또는 출고여부 체크) : No.·수량·최종입금액·납품일자·입금일자·상태·구분(규격)·납품형태·택배비·명세표발송여부·제2배송지·박스히어로완료·집계월·발행완료 — 맨 아래 줄에 <b>수량·최종입금액·택배비 총합</b>과 <b>박스히어로완료·발행완료 미체크 개수</b>(다 체크면 0)가 나옵니다.
+· <b>입고 표</b>(입출고="입고" 또는 출고여부 미체크) : No.·수량·입고액·납품일자·입금일자·상태·구분(규격)·납품형태·발주서발송여부·발주관리번호·제2배송지·박스히어로완료 — 맨 아래 줄에 <b>수량·입고액 총합</b>과 <b>박스히어로완료 미체크 개수</b>가 나옵니다.</div></li>
+<li><b>🔄 다시 조회</b> : 노션에서 최신 데이터를 다시 받아옵니다.</li>
+
 <h4>⚠️ 딱 두 가지만 기억하기</h4>
 <li>노션에서 <b>자동 계산되는 값(수식·롤업)</b>은 이 앱에서 바꿀 수 없습니다.</li>
 <li>방금 고친 값이 화면에 바로 안 보이면 <b>⟳ 새로고침</b>을 눌러주세요. (통계는 1~2분 캐시를 사용합니다)</li>
@@ -343,7 +386,7 @@ td{padding:8px;border-bottom:1px solid #f1f4f8;vertical-align:middle}
 <div id="toast" style="position:fixed;bottom:18px;left:50%;transform:translateX(-50%);z-index:120;max-width:92vw;background:#172033;color:#fff;padding:12px 16px;border-radius:12px;box-shadow:var(--shadow);display:none;font-size:13px"></div>
 
 <script>
-const GAS_URL='https://script.google.com/macros/s/AKfycbxM5OHgyvQ8e9HzMXRfEBsVjbUo-rtNDTMWnK10BMrwgWjVX2Yfh2asEbfau3RkXoejNg/exec';
+const GAS_URL='https://script.google.com/macros/s/AKfycbwK7pvgM_MvuTwcOdUMcLfOUFZQ5qJvihk9a-dwDMFRN0HbEAKJkUJSllKmxmV17JHEdA/exec';
 let INIT=null,STATS=null,DASH=null;
 let currentTab='dashboard',currentEdit=null;
 let listState={clients:{cursor:null,search:''}};
@@ -487,8 +530,8 @@ function yy_(y){return String(y).slice(2);}
 function switchTab(tab){
   currentTab=tab;
   document.querySelectorAll('.tab').forEach(function(b){b.classList.toggle('active',b.dataset.tab===tab);});
-  ['dashboard','stats','clients','newclient','history'].forEach(function(x){$(x+'Panel').classList.toggle('hidden',x!==tab);});
-  if(tab==='dashboard')loadDashboard();else if(tab==='stats')loadStats();else if(tab==='history')loadHistory();else if(tab==='newclient')$('dormantCandidates').innerHTML='';
+  ['dashboard','stats','clients','newclient','history','inoutsearch'].forEach(function(x){$(x+'Panel').classList.toggle('hidden',x!==tab);});
+  if(tab==='dashboard')loadDashboard();else if(tab==='stats')loadStats();else if(tab==='history')loadHistory();else if(tab==='newclient')$('dormantCandidates').innerHTML='';else if(tab==='inoutsearch')loadIoSearch();
 }
 /* ── 부팅: 실제 연결 점검 후 "연결됨 / 연결 끊김" ── */
 async function boot(){
@@ -737,6 +780,25 @@ function monthCards_(title,arrA,unitA,arrB,unitB,cls){
   }
   return h+'</div>';
 }
+/* ══════ v10.2 [R3]: 월별 3영역 통합표 — 계산 수식은 기존 monthly 배열(salesQty/sales/profit/inQty/inAmt) 그대로,
+   표시 계층에서만 한 표로 합침. 판매금·입고액은 글씨를 크게(.big) */
+function monthTableCombined_(m,yy){
+  let h='<h3>월별 총 판매량/판매금/Profit/본사입고량/입고액 ('+esc(yy)+'년 1월~12월)</h3><div class="table-wrap"><table class="cmb"><thead><tr><th>구분</th>';
+  for(let i=1;i<=12;i++)h+='<th>'+i+'월</th>';
+  h+='</tr></thead><tbody>';
+  function row(label,arr,unit,cls,big){
+    h+='<tr><th>'+esc(label)+'</th>';
+    for(let i=0;i<12;i++)h+='<td class="'+cls+(big?' big':'')+'">'+esc(fmtK_(arr?arr[i]:0))+unit+'</td>';
+    h+='</tr>';
+  }
+  row('판매수량',m.salesQty,'개','c-blue',false);
+  row('판매금',m.sales,'원','c-blue',true);
+  row('Profit',m.profit,'원','c-violet',false);
+  row('입고수량',m.inQty,'개','c-green',false);
+  row('입고액',m.inAmt,'원','c-green',true);
+  h+='</tbody></table></div>';
+  return h;
+}
 async function loadStats(force){
   const box=$('statsBody');box.innerHTML='<div class="empty"><span class="spinner"></span> 통계 집계 중</div>';
   try{STATS=await api('getStats',force?{force:true}:{});renderStats();}catch(e){box.innerHTML='<div class="notice error">'+esc(e.message)+'</div>';}
@@ -769,9 +831,7 @@ function renderStats(){
      statCard_('작년 총 출고량 / 판매금',fmtK_(s.summary.outQtyLast)+'개 · '+fmtK_(s.summary.salesLast)+'원','c-blue','평균 '+fmtK_(s.summary.avgOutLast)+'개 · '+fmtK_(s.summary.avgSalesLast)+'원')+
      statCard_('작년 총 Profit / 평균 Profit',fmtK_(s.summary.profitLast)+'원','c-green','평균 '+fmtK_(s.summary.avgProfitLastM)+'원')+
      '</div>';
-  h+=monthCards_('월별 총 판매수량 및 판매금 ('+yy+'년 1월~12월)',m.salesQty,'개',m.sales,'원','');
-  h+=monthCards_('월별 총 입고수량 및 입고액 ('+yy+'년 1월~12월)',m.inQty,'개',m.inAmt,'원','green');
-  h+=monthCards_('월별 Profit ('+yy+'년 1월~12월)',m.profit,'원',null,'','violet');
+  h+=monthTableCombined_(m,yy);
   $('statsBody').innerHTML=h;
 }
 async function searchStats(){
@@ -788,6 +848,105 @@ async function searchStats(){
       statCard_('미수금',fmtK_(r.unpaid)+'원','c-rose')+statCard_('평균 Profit',fmtK_(r.avgProfit)+'원','c-slate','출고 건수 기준')+'</div>';
   }catch(e){box.innerHTML='<div class="notice error">'+esc(e.message)+'</div>';}
 }
+/* ══════ v10.2 [R1]: 입출고 검색 탭 — 거래처 자동완성 + 기간 바로가기 + 출고/입고 표(총합·미체크 집계) ══════ */
+let IODATA=null,ioLoaded=false;
+async function loadIoData(force){
+  if(ioLoaded&&!force)return IODATA;
+  const box=$('ioSearchBox');
+  if(!ioLoaded)box.innerHTML='<div class="empty"><span class="spinner"></span> 노션 조회 중</div>';
+  try{
+    IODATA=await api('searchInouts',{});ioLoaded=true;fillIoDatalist();return IODATA;
+  }catch(e){box.innerHTML='<div class="notice error">'+esc(e.message)+'</div>';throw e;}
+}
+function fillIoDatalist(){
+  const dl=$('ioClientList');if(!dl||!IODATA)return;
+  dl.innerHTML=(IODATA.clients||[]).map(function(n){return '<option value="'+esc(n)+'">';}).join('');
+}
+/* 분류 규칙(요청 그대로): 입출고="출고" 또는 출고여부=Checked → 출고 / 입출고="입고" 또는 출고여부=Un-Check → 입고 */
+function ioClassify_(r){
+  if(r.kind==='out'||r.outDone===true)return 'out';
+  if(r.kind==='in'||r.outDone===false)return 'in';
+  return '';
+}
+function ioRowDate_(r){return r.date||r.orderDate||'';}
+function ioFilter(){
+  if(!IODATA)return{out:[],in:[]};
+  const q=$('ioSearchInput').value.trim();
+  const st=$('ioStart').value,en=$('ioEnd').value;
+  const out=[],inn=[];
+  (IODATA.rows||[]).forEach(function(r){
+    const c=ioClassify_(r);if(!c)return;
+    if(q&&(String(r.clientName||'').indexOf(q)<0&&String(r.client||'').indexOf(q)<0&&String(r.title||'').indexOf(q)<0))return;
+    if(st||en){const d=ioRowDate_(r);if(!d)return;if(st&&d<st)return;if(en&&d>en)return;}
+    (c==='out'?out:inn).push(r);
+  });
+  const cmp=function(a,b){const da=ioRowDate_(a),db=ioRowDate_(b);if(da!==db)return da<db?1:-1;return String(a.clientName||'').localeCompare(String(b.clientName||''),'ko');};
+  out.sort(cmp);inn.sort(cmp);
+  return {out:out,in:inn};
+}
+function ioCheckCell_(v){return v?'<span class="pill ok">✔</span>':'<span class="pill no">✖</span>';}
+function renderIoResults(){
+  const res=ioFilter(),box=$('ioSearchBox');
+  let h='<div class="io-summary"><span class="io-chip">출고 '+fmtK_(res.out.length)+'건</span><span class="io-chip g">입고 '+fmtK_(res.in.length)+'건</span></div>';
+  /* ── 출고 표 ── */
+  h+='<h3>출고 (입출고="출고" 또는 출고여부 Checked)</h3>';
+  if(!res.out.length)h+='<div class="empty">해당 출고 내역이 없습니다.</div>';
+  else{
+    let sq=0,paid=0,cour=0,bx=0,iss=0;
+    h+='<div class="table-wrap"><table><thead><tr><th class="col-no">No.</th><th>수량</th><th>최종입금액</th><th>납품일자</th><th>입금일자</th><th>상태</th><th>구분(규격)</th><th>납품형태</th><th>택배비</th><th>명세표발송여부</th><th>제2배송지</th><th>박스히어로완료</th><th>집계월</th><th>발행완료</th><th>관리</th></tr></thead><tbody>';
+    res.out.forEach(function(r,i){
+      sq+=(r.qty||0);paid+=(r.paid||0);cour+=(r.courier||0);
+      if(!r.boxhero)bx++;if(!r.issued)iss++;
+      h+='<tr><td class="col-no">'+(i+1)+'</td><td>'+esc(fmtK_(r.qty))+'</td><td>'+esc(fmtK_(r.paid))+'</td>'+
+        '<td class="nowrap">'+esc(mdDow_(r.date))+'</td><td class="nowrap">'+esc(mdDow_(r.payDate))+'</td>'+
+        '<td>'+esc(r.status||'—')+'</td><td>'+esc(r.specKubun||'—')+'</td><td class="c-type">'+typeCell_(r.type)+'</td>'+
+        '<td>'+esc(fmtK_(r.courier))+'</td><td>'+ioCheckCell_(r.specSend)+'</td><td>'+esc(r.secondAddr||'—')+'</td>'+
+        '<td>'+ioCheckCell_(r.boxhero)+'</td><td>'+esc(r.aggMonth||'—')+'</td><td>'+ioCheckCell_(r.issued)+'</td>'+
+        '<td>'+manageBtns_(r.id)+'</td></tr>';
+    });
+    h+='</tbody><tfoot><tr><th>합계</th><th>'+esc(fmtK_(sq))+'</th><th>'+esc(fmtK_(paid))+'원</th><th colspan="5"></th><th>'+esc(fmtK_(cour))+'원</th><th colspan="2"></th><th>미체크 '+bx+'건</th><th></th><th>미체크 '+iss+'건</th><th></th></tr></tfoot></table></div>';
+  }
+  /* ── 입고 표 ── */
+  h+='<h3>입고 (입출고="입고" 또는 출고여부 Un-Check)</h3>';
+  if(!res.in.length)h+='<div class="empty">해당 입고 내역이 없습니다.</div>';
+  else{
+    let sq=0,amt=0,bx=0;
+    h+='<div class="table-wrap"><table><thead><tr><th class="col-no">No.</th><th>수량</th><th>입고액</th><th>납품일자</th><th>입금일자</th><th>상태</th><th>구분(규격)</th><th>납품형태</th><th>발주서발송여부</th><th>발주관리번호</th><th>제2배송지</th><th>박스히어로완료</th><th>관리</th></tr></thead><tbody>';
+    res.in.forEach(function(r,i){
+      sq+=(r.qty||0);amt+=(r.inAmt||0);
+      if(!r.boxhero)bx++;
+      h+='<tr><td class="col-no">'+(i+1)+'</td><td>'+esc(fmtK_(r.qty))+'</td><td>'+esc(fmtK_(r.inAmt))+'</td>'+
+        '<td class="nowrap">'+esc(mdDow_(r.date))+'</td><td class="nowrap">'+esc(mdDow_(r.payDate))+'</td>'+
+        '<td>'+esc(r.status||'—')+'</td><td>'+esc(r.specKubun||'—')+'</td><td class="c-type">'+typeCell_(r.type)+'</td>'+
+        '<td>'+ioCheckCell_(r.poSent)+'</td><td>'+esc(r.poNo||'—')+'</td><td>'+esc(r.secondAddr||'—')+'</td>'+
+        '<td>'+ioCheckCell_(r.boxhero)+'</td>'+
+        '<td>'+manageBtns_(r.id)+'</td></tr>';
+    });
+    h+='</tbody><tfoot><tr><th>합계</th><th>'+esc(fmtK_(sq))+'</th><th>'+esc(fmtK_(amt))+'원</th><th colspan="6"></th><th></th><th></th><th>미체크 '+bx+'건</th><th></th></tr></tfoot></table></div>';
+  }
+  box.innerHTML=h;
+  bindManageBtns_(box);
+}
+async function loadIoSearch(){
+  try{await loadIoData(false);}catch(e){return;}
+  renderIoResults();
+}
+function ioLastDay_(y,m){return new Date(Date.UTC(y,m,0)).getUTCDate();}
+function ioSetRange_(s,e){$('ioStart').value=s;$('ioEnd').value=e;if(ioLoaded)renderIoResults();}
+function ioPreset_(kind){
+  const t=todayKST_(),y=Number(t.slice(0,4)),m=Number(t.slice(5,7));
+  if(kind==='month')ioSetRange_(t.slice(0,7)+'-01',t.slice(0,7)+'-'+ioLastDay_(y,m));
+  else if(kind==='2m'){const py=m===1?y-1:y,pm=m===1?12:m-1;ioSetRange_(py+'-'+('0'+pm).slice(-2)+'-01',t.slice(0,7)+'-'+ioLastDay_(y,m));}
+  else if(kind==='year')ioSetRange_(y+'-01-01',y+'-12-31');
+  else ioSetRange_('','');
+}
+$('ioSearchBtn').addEventListener('click',function(){if(!ioLoaded)loadIoSearch();else renderIoResults();});
+$('ioReloadBtn').addEventListener('click',async function(){const b=$('ioReloadBtn');setBusy(b,true);try{await loadIoData(true);renderIoResults();}catch(e){}finally{setBusy(b,false);}});
+$('ioSearchInput').addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();if(ioLoaded)renderIoResults();else loadIoSearch();}});
+$('ioPresetMonth').addEventListener('click',function(){ioPreset_('month');});
+$('ioPreset2m').addEventListener('click',function(){ioPreset_('2m');});
+$('ioPresetYear').addEventListener('click',function(){ioPreset_('year');});
+$('ioPresetClear').addEventListener('click',function(){ioPreset_('clear');});
 /* ══════ v10.0 최종: 비밀번호 관리 (서버 저장 · 재배포 불필요) ══════ */
 function openPwModal(){
   $('pwCur').value='';$('pwNew').value='';$('pwNew2').value='';$('pwNotice').innerHTML='';
@@ -1270,6 +1429,7 @@ if('serviceWorker' in navigator){
   });
 }
 </script>
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous"></script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous"></script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous"></script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous"></script>
